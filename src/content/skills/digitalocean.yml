@@ -1,0 +1,5 @@
+name: DigitalOcean
+category: Cloud Platforms
+icon: https://cdn.jsdelivr.net/gh/devicons/devicon/icons/digitalocean/digitalocean-original.svg
+url: https://www.digitalocean.com/
+order: 4

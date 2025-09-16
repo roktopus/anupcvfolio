@@ -75,10 +75,46 @@ const postCollection = defineCollection({
     }),
 });
 
+const companyCollection = defineCollection({
+  loader: glob({ pattern: '**/[^_]*.yml', base: './src/content/companies' }),
+  schema: z.object({
+    name: z.string(),
+    url: z.string(),
+    logo: z.string(),
+    order: z.number(),
+  }),
+});
+
+const skillCollection = defineCollection({
+  loader: glob({ pattern: '**/[^_]*.yml', base: './src/content/skills' }),
+  schema: z.object({
+    name: z.string(),
+    category: z.string(),
+    icon: z.string(),
+    url: z.string().optional(),
+    order: z.number(),
+  }),
+});
+
+const certificationCollection = defineCollection({
+  loader: glob({
+    pattern: '**/[^_]*.yml',
+    base: './src/content/certifications',
+  }),
+  schema: z.object({
+    name: z.string(),
+    icon: z.string(),
+    order: z.number(),
+  }),
+});
+
 export const collections = {
   pages: pageCollection,
   links: linkCollection,
   jobs: jobCollection,
   talks: talkCollection,
   posts: postCollection,
+  companies: companyCollection,
+  skills: skillCollection,
+  certifications: certificationCollection,
 };

@@ -1,0 +1,5 @@
+name: GitLab
+category: Deployment & Version Control
+icon: https://cdn.jsdelivr.net/gh/devicons/devicon/icons/gitlab/gitlab-original.svg
+url: https://gitlab.com/
+order: 4

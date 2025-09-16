@@ -1,0 +1,5 @@
+name: Bitbucket
+category: Deployment & Version Control
+icon: https://cdn.jsdelivr.net/gh/devicons/devicon/icons/bitbucket/bitbucket-original.svg
+url: https://bitbucket.org/
+order: 3

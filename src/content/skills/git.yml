@@ -1,0 +1,5 @@
+name: Git
+category: Deployment & Version Control
+icon: https://cdn.jsdelivr.net/gh/devicons/devicon/icons/git/git-original.svg
+url: https://git-scm.com/
+order: 2

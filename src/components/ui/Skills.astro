@@ -1,0 +1,101 @@
+---
+import { getCollection } from 'astro:content';
+import { Image } from 'astro:assets';
+import { getImage } from 'astro:assets';
+
+// Get skills from content collection
+const skills = await getCollection('skills');
+const sortedSkills = skills.sort((a, b) => a.data.order - b.data.order);
+
+// Group skills by category
+const skillsByCategory = sortedSkills.reduce(
+    (acc, skill) => {
+        const category = skill.data.category;
+        if (!acc[category]) {
+            acc[category] = [];
+        }
+        acc[category].push(skill);
+        return acc;
+    },
+    {} as Record<string, typeof skills>
+);
+
+// Import all local logos at the top
+import scrumLogo from '@/assets/images/logos/scrum-org-logo.svg';
+
+// Helper function to get icon image
+async function getIconImage(iconPath: string) {
+    if (iconPath.startsWith('http')) {
+        // External URL - return as is
+        return { src: iconPath };
+    } else {
+        // Local file - handle specific cases
+        let logoModule;
+        switch (iconPath) {
+            case 'scrum-org-logo.svg':
+                logoModule = { default: scrumLogo };
+                break;
+            default:
+                // For other local files, try dynamic import
+                try {
+                    logoModule = await import(
+                        `@/assets/images/logos/${iconPath}`
+                    );
+                } catch (error) {
+                    console.warn(`Could not import logo: ${iconPath}`);
+                    return { src: '' };
+                }
+        }
+        return await getImage({ src: logoModule.default, format: 'avif' });
+    }
+}
+---
+
+<div class="flex flex-col gap-6">
+    <h2 class="text-headings text-lg font-semibold">I've worked with</h2>
+
+    {
+        Object.entries(skillsByCategory).map(([category, categorySkills]) => (
+            <div class="flex flex-col gap-3">
+                <h3 class="text-foreground font-medium">{category}</h3>
+                <div class="flex flex-wrap gap-3">
+                    {categorySkills.map(async (skill) => {
+                        const iconImage = await getIconImage(skill.data.icon);
+                        const SkillComponent = skill.data.url ? 'a' : 'div';
+                        const skillProps = skill.data.url
+                            ? {
+                                  href: skill.data.url,
+                                  target: '_blank',
+                                  rel: 'noopener noreferrer',
+                              }
+                            : {};
+
+                        return (
+                            <SkillComponent
+                                {...skillProps}
+                                class="flex items-center gap-2 bg-muted-foreground/20 px-3 py-2 rounded-lg hover:bg-muted-foreground/30 transition-colors"
+                            >
+                                {iconImage.src.startsWith('http') ? (
+                                    <img
+                                        src={iconImage.src}
+                                        alt={skill.data.name}
+                                        class="w-5 h-5"
+                                    />
+                                ) : (
+                                    <Image
+                                        src={iconImage.src}
+                                        alt={skill.data.name}
+                                        width={20}
+                                        height={20}
+                                        class="w-5 h-5"
+                                    />
+                                )}
+                                <span class="text-sm">{skill.data.name}</span>
+                            </SkillComponent>
+                        );
+                    })}
+                </div>
+            </div>
+        ))
+    }
+</div>

@@ -1,0 +1,5 @@
+name: Splunk
+category: API & Logging
+icon: https://cdn.jsdelivr.net/gh/devicons/devicon/icons/splunk/splunk-original.svg
+url: https://www.splunk.com/
+order: 2
