@@ -1,0 +1,5 @@
+name: Azure
+category: Cloud Platforms
+icon: https://cdn.jsdelivr.net/gh/devicons/devicon/icons/azure/azure-original.svg
+url: https://azure.microsoft.com/
+order: 2

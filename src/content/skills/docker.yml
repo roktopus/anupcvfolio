@@ -1,0 +1,5 @@
+name: Docker
+category: Deployment & Version Control
+icon: https://cdn.jsdelivr.net/gh/devicons/devicon/icons/docker/docker-original.svg
+url: https://www.docker.com/
+order: 1

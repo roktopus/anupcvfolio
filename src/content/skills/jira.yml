@@ -1,0 +1,5 @@
+name: JIRA
+category: Project Management
+icon: https://cdn.jsdelivr.net/gh/devicons/devicon/icons/jira/jira-original.svg
+url: https://www.atlassian.com/software/jira
+order: 1

@@ -1,0 +1,5 @@
+name: Postman
+category: API & Logging
+icon: https://cdn.jsdelivr.net/gh/devicons/devicon/icons/postman/postman-original.svg
+url: https://www.postman.com/
+order: 1

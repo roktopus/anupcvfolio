@@ -1,0 +1,5 @@
+name: PostgreSQL
+category: Databases
+icon: https://cdn.jsdelivr.net/gh/devicons/devicon/icons/postgresql/postgresql-original.svg
+url: https://www.postgresql.org/
+order: 3

@@ -1,0 +1,5 @@
+name: MySQL
+category: Databases
+icon: https://cdn.jsdelivr.net/gh/devicons/devicon/icons/mysql/mysql-original.svg
+url: https://www.mysql.com/
+order: 1

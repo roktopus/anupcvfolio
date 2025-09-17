@@ -1,0 +1,5 @@
+name: GraphQL
+category: API & Logging
+icon: https://cdn.jsdelivr.net/gh/devicons/devicon/icons/graphql/graphql-plain.svg
+url: https://graphql.org/
+order: 3

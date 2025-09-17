@@ -1,0 +1,5 @@
+name: GitHub
+category: Deployment & Version Control
+icon: https://cdn.jsdelivr.net/gh/devicons/devicon/icons/github/github-original.svg
+url: https://github.com/
+order: 5

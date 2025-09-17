@@ -1,0 +1,5 @@
+name: CentOS
+category: Servers & Platforms
+icon: https://cdn.jsdelivr.net/gh/devicons/devicon/icons/centos/centos-original.svg
+url: https://www.centos.org/
+order: 3
