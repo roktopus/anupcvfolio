@@ -1,32 +1,41 @@
 ---
-import Container from '@/components/Container.astro';
-
 const pathname = Astro.url.pathname;
 
 const isHomePage = pathname === '/';
 const isWritingPage = pathname.startsWith('/writing');
-
 ---
 
-<Container as='header' class="w-full max-w-full flex justify-center items-center">
-  <div class="w-max fixed top-0 mt-5 bg-muted-foreground/40 backdrop-blur-md border border-border rounded-full p-1">
-    <nav class="flex items-center">
-      <ul class="flex items-center gap-1">
-        <li>
-          <a href="/" class:list={[
-            'font-medium transition-colors block px-5 py-2',
-            'hover:text-headings',
-            isHomePage && 'text-headings bg-muted-foreground/40 rounded-full',
-          ]}>Home</a>
-        </li>
-        <li>
-          <a href="/writing" class:list={[
-            'font-medium transition-colors block px-5 py-2',
-            'hover:text-headings',
-            isWritingPage && 'text-headings bg-muted-foreground/40 rounded-full',
-          ]}>Writing</a>
-        </li>
-      </ul>
-    </nav>
-  </div>
-</Container>
+<header
+    class="w-full flex justify-center items-center fixed top-0 left-0 right-0 z-50"
+>
+    <div
+        class="w-max mt-5 bg-white/80 dark:bg-black/80 backdrop-blur-md border border-gray-200 dark:border-gray-800 rounded-full p-1 shadow-lg"
+    >
+        <nav class="flex items-center">
+            <ul class="flex items-center gap-1">
+                <li>
+                    <a
+                        href="/"
+                        class:list={[
+                            'font-medium transition-colors block px-5 py-2 rounded-full',
+                            'text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white',
+                            isHomePage &&
+                                'text-white dark:text-black bg-gradient-to-r from-yellow-500 to-orange-500 dark:from-purple-600 dark:to-red-600 shadow-md',
+                        ]}>🏰 Root</a
+                    >
+                </li>
+                <li>
+                    <a
+                        href="/writing"
+                        class:list={[
+                            'font-medium transition-colors block px-5 py-2 rounded-full',
+                            'text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white',
+                            isWritingPage &&
+                                'text-white dark:text-black bg-gradient-to-r from-yellow-500 to-orange-500 dark:from-purple-600 dark:to-red-600 shadow-md',
+                        ]}>📜Scrolls</a
+                    >
+                </li>
+            </ul>
+        </nav>
+    </div>
+</header>

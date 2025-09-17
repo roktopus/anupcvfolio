@@ -1,0 +1,362 @@
+---
+import { getCollection } from 'astro:content';
+import { Image } from 'astro:assets';
+import { getImage } from 'astro:assets';
+
+// ============================================================================
+// DATA COLLECTION & PROCESSING
+// ============================================================================
+
+/**
+ * Generic function to get and sort collections by order
+ * @param collectionName - Name of the content collection
+ * @returns Sorted array of collection entries
+ */
+async function getSortedCollection(collectionName: string) {
+    const collection = await getCollection(collectionName);
+    return collection.sort((a, b) => a.data.order - b.data.order);
+}
+
+/**
+ * Generic function to filter and sort skills by category
+ * @param category - Category name to filter by
+ * @returns Sorted array of skills in the specified category
+ */
+async function getSortedSkillsByCategory(category: string) {
+    const skills = await getCollection('skills');
+    const filteredSkills = skills.filter(
+        (skill) => skill.data.category === category
+    );
+    return filteredSkills.sort((a, b) => a.data.order - b.data.order);
+}
+
+// Get all data collections
+const companies = await getSortedCollection('companies');
+const certifications = await getSortedCollection('certifications');
+const cloudPlatforms = await getSortedSkillsByCategory('Cloud Platforms');
+const programmingLanguages = await getSortedSkillsByCategory(
+    'Programming Languages'
+);
+const frameworks = await getSortedSkillsByCategory('Frameworks & Libraries');
+const databases = await getSortedSkillsByCategory('Databases');
+const deploymentTools = await getSortedSkillsByCategory(
+    'Deployment & Version Control'
+);
+
+// ============================================================================
+// ASSET IMPORTS
+// ============================================================================
+
+// Import company logos
+import vpixLogo from '@/assets/images/logos/vpix-logo.svg';
+import zolidarLogo from '@/assets/images/logos/zolidar-logo.svg';
+import vertivLogo from '@/assets/images/logos/vertiv-logo.svg';
+import onwardLogo from '@/assets/images/logos/onward-logo.svg';
+import infosysLogo from '@/assets/images/logos/infosys-logo.png';
+import wiproLogo from '@/assets/images/logos/wipro-logo.svg';
+import emersonLogo from '@/assets/images/logos/emerson-logo.svg';
+import scrumLogo from '@/assets/images/logos/scrum-org-logo.svg';
+
+// ============================================================================
+// HELPER FUNCTIONS
+// ============================================================================
+
+/**
+ * Company logo mapping for optimized imports
+ */
+const COMPANY_LOGOS = {
+    'vpix-logo.svg': vpixLogo,
+    'zolidar-logo.svg': zolidarLogo,
+    'vertiv-logo.svg': vertivLogo,
+    'onward-logo.svg': onwardLogo,
+    'infosys-logo.png': infosysLogo,
+    'wipro-logo.svg': wiproLogo,
+    'emerson-logo.svg': emersonLogo,
+} as const;
+
+/**
+ * Certification icon mapping for optimized imports
+ */
+const CERTIFICATION_ICONS = {
+    'scrum-org-logo.svg': scrumLogo,
+} as const;
+
+/**
+ * Process company logo and return optimized image
+ * @param logoPath - Path to the logo file
+ * @returns Processed image object
+ */
+async function getCompanyLogo(logoPath: string) {
+    const logoModule = COMPANY_LOGOS[logoPath as keyof typeof COMPANY_LOGOS];
+
+    if (logoModule) {
+        return await getImage({ src: logoModule, format: 'avif' });
+    }
+
+    // Fallback for dynamic imports
+    try {
+        const dynamicLogo = await import(`@/assets/images/logos/${logoPath}`);
+        return await getImage({ src: dynamicLogo.default, format: 'avif' });
+    } catch (error) {
+        console.warn(`Could not import company logo: ${logoPath}`);
+        return { src: '' };
+    }
+}
+
+/**
+ * Process certification icon and return optimized image
+ * @param iconPath - Path to the icon file
+ * @returns Processed image object
+ */
+async function getCertificationIcon(iconPath: string) {
+    // Handle external URLs
+    if (iconPath.startsWith('http')) {
+        return { src: iconPath };
+    }
+
+    const iconModule =
+        CERTIFICATION_ICONS[iconPath as keyof typeof CERTIFICATION_ICONS];
+
+    if (iconModule) {
+        return await getImage({ src: iconModule, format: 'avif' });
+    }
+
+    // Fallback for dynamic imports
+    try {
+        const dynamicIcon = await import(`@/assets/images/logos/${iconPath}`);
+        return await getImage({ src: dynamicIcon.default, format: 'avif' });
+    } catch (error) {
+        console.warn(`Could not import certification icon: ${iconPath}`);
+        return { src: '' };
+    }
+}
+
+/**
+ * Patent icon SVG - inline for performance
+ */
+const PATENT_ICON_SVG = `
+<svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+</svg>
+`;
+---
+
+<div class="flex flex-col gap-6">
+    <h2 class="text-headings text-lg font-semibold magic-text">
+        📜 Chronicles of Battle & Craft Across Digital Kingdoms
+    </h2>
+
+    <div class="grid grid-cols-1 gap-4">
+        <!-- Companies Section -->
+        <div class="flex items-center justify-between">
+            <span class="text-sm text-muted-foreground">Companies</span>
+            <div class="flex gap-2">
+                {
+                    companies.map(async (company) => {
+                        const logoImage = await getCompanyLogo(
+                            company.data.logo
+                        );
+                        return (
+                            <a
+                                href={company.data.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                class="group relative p-2 rounded-lg hover:bg-muted-foreground/20 transition-colors"
+                                title={company.data.name}
+                            >
+                                <Image
+                                    src={logoImage.src}
+                                    alt={`${company.data.name} Logo`}
+                                    width={24}
+                                    height={24}
+                                    class="w-6 h-6 opacity-70 group-hover:opacity-100 transition-opacity"
+                                />
+                            </a>
+                        );
+                    })
+                }
+            </div>
+        </div>
+
+        <!-- Certifications Section -->
+        <div class="flex items-center justify-between">
+            <span class="text-sm text-muted-foreground">Certifications</span>
+            <div class="flex gap-2">
+                {
+                    certifications.map(async (certification) => {
+                        const iconImage = await getCertificationIcon(
+                            certification.data.icon
+                        );
+                        return (
+                            <div
+                                class="group relative p-2 rounded-lg hover:bg-muted-foreground/20 transition-colors"
+                                title={certification.data.name}
+                            >
+                                {iconImage.src.startsWith('http') ? (
+                                    <img
+                                        src={iconImage.src}
+                                        alt={certification.data.name}
+                                        class="w-6 h-6 opacity-70 group-hover:opacity-100 transition-opacity"
+                                    />
+                                ) : (
+                                    <Image
+                                        src={iconImage.src}
+                                        alt={certification.data.name}
+                                        width={24}
+                                        height={24}
+                                        class="w-6 h-6 opacity-70 group-hover:opacity-100 transition-opacity"
+                                    />
+                                )}
+                            </div>
+                        );
+                    })
+                }
+            </div>
+        </div>
+
+        <!-- Patents Section -->
+        <div class="flex items-center justify-between">
+            <span class="text-sm text-muted-foreground">Patents</span>
+            <div class="flex gap-2">
+                <a
+                    href="https://image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/20240019995"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="group relative p-2 rounded-lg hover:bg-muted-foreground/20 transition-colors"
+                    title="USER INTERFACE (UI) FOR POWER SYSTEM CONTROLLER DEVICE"
+                >
+                    <div
+                        class="w-6 h-6 text-blue-600 opacity-70 group-hover:opacity-100 transition-opacity"
+                        set:html={PATENT_ICON_SVG}
+                    />
+                </a>
+            </div>
+        </div>
+
+        <!-- Cloud Platforms Section -->
+        <div class="flex items-center justify-between">
+            <span class="text-sm text-muted-foreground">Cloud Platforms</span>
+            <div class="flex gap-2">
+                {
+                    cloudPlatforms.map((platform) => (
+                        <a
+                            href={platform.data.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="group relative p-2 rounded-lg hover:bg-muted-foreground/20 transition-colors"
+                            title={platform.data.name}
+                        >
+                            <img
+                                src={platform.data.icon}
+                                alt={`${platform.data.name} Logo`}
+                                class="w-6 h-6 opacity-70 group-hover:opacity-100 transition-opacity"
+                            />
+                        </a>
+                    ))
+                }
+            </div>
+        </div>
+
+        <!-- Programming Languages Section -->
+        <div class="flex items-center justify-between">
+            <span class="text-sm text-muted-foreground"
+                >Programming Languages</span
+            >
+            <div class="flex gap-2">
+                {
+                    programmingLanguages.map((language) => (
+                        <a
+                            href={language.data.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="group relative p-2 rounded-lg hover:bg-muted-foreground/20 transition-colors"
+                            title={language.data.name}
+                        >
+                            <img
+                                src={language.data.icon}
+                                alt={`${language.data.name} Logo`}
+                                class="w-6 h-6 opacity-70 group-hover:opacity-100 transition-opacity"
+                            />
+                        </a>
+                    ))
+                }
+            </div>
+        </div>
+
+        <!-- Frameworks & Libraries Section -->
+        <div class="flex items-center justify-between">
+            <span class="text-sm text-muted-foreground"
+                >Frameworks & Libraries</span
+            >
+            <div class="flex gap-2">
+                {
+                    frameworks.map((framework) => (
+                        <a
+                            href={framework.data.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="group relative p-2 rounded-lg hover:bg-muted-foreground/20 transition-colors"
+                            title={framework.data.name}
+                        >
+                            <img
+                                src={framework.data.icon}
+                                alt={`${framework.data.name} Logo`}
+                                class="w-6 h-6 opacity-70 group-hover:opacity-100 transition-opacity"
+                            />
+                        </a>
+                    ))
+                }
+            </div>
+        </div>
+
+        <!-- Databases Section -->
+        <div class="flex items-center justify-between">
+            <span class="text-sm text-muted-foreground">Databases</span>
+            <div class="flex gap-2">
+                {
+                    databases.map((database) => (
+                        <a
+                            href={database.data.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="group relative p-2 rounded-lg hover:bg-muted-foreground/20 transition-colors"
+                            title={database.data.name}
+                        >
+                            <img
+                                src={database.data.icon}
+                                alt={`${database.data.name} Logo`}
+                                class="w-6 h-6 opacity-70 group-hover:opacity-100 transition-opacity"
+                            />
+                        </a>
+                    ))
+                }
+            </div>
+        </div>
+
+        <!-- Deployment & Version Control Section -->
+        <div class="flex items-center justify-between">
+            <span class="text-sm text-muted-foreground"
+                >Deployment & Version Control</span
+            >
+            <div class="flex gap-2">
+                {
+                    deploymentTools.map((tool) => (
+                        <a
+                            href={tool.data.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="group relative p-2 rounded-lg hover:bg-muted-foreground/20 transition-colors"
+                            title={tool.data.name}
+                        >
+                            <img
+                                src={tool.data.icon}
+                                alt={`${tool.data.name} Logo`}
+                                class="w-6 h-6 opacity-70 group-hover:opacity-100 transition-opacity"
+                            />
+                        </a>
+                    ))
+                }
+            </div>
+        </div>
+    </div>
+</div>

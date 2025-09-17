@@ -4,13 +4,8 @@ import BaseLayout from '@/layouts/BaseLayout.astro';
 import Container from '@/components/Container.astro';
 import Author from '@/components/ui/Author.astro';
 import { DEFAULT_CONFIGURATION } from '@/lib/constants';
-import WorkExperience from '@/components/ui/WorkExperience.astro';
 import Talk from '@/components/ui/Talk.astro';
-import Skills from '@/components/ui/Skills.astro';
-import Companies from '@/components/ui/Companies.astro';
-import Certifications from '@/components/ui/Certifications.astro';
-import Patents from '@/components/ui/Patents.astro';
-import { sortJobsByDate } from '@/lib/utils';
+import ExperienceGrid from '@/components/ui/ExperienceGrid.astro';
 
 const entry = await getEntry('pages', 'homepage');
 
@@ -20,8 +15,6 @@ if (!entry) {
 
 const { Content } = await render(entry);
 
-const jobs = await getCollection('jobs');
-const sortedJobs = sortJobsByDate(jobs);
 const talks = await getCollection('talks');
 ---
 
@@ -32,9 +25,6 @@ const talks = await getCollection('talks');
 
     <Container as="section" class="py-6">
         <div class="flex flex-col gap-6">
-            <div class="flex items-center">
-                <span class="text-headings">About</span>
-            </div>
             <div class="prose dark:prose-invert">
                 <Content />
             </div>
@@ -42,34 +32,9 @@ const talks = await getCollection('talks');
     </Container>
 
     <Container as="section" class="py-6">
-        <Certifications />
+        <ExperienceGrid />
     </Container>
 
-    <Container as="section" class="py-6">
-        <Patents />
-    </Container>
-
-    <Container as="section" class="py-6">
-        <Skills />
-    </Container>
-
-    <Container as="section" class="py-6">
-        <Companies />
-    </Container>
-    {
-        sortedJobs.length > 0 && (
-            <Container as="section" class="py-6">
-                <div class="flex flex-col gap-5">
-                    <span class="text-headings">Recent Companies</span>
-                    <ul class="flex flex-col gap-8">
-                        {sortedJobs.map((job) => (
-                            <WorkExperience entry={job} />
-                        ))}
-                    </ul>
-                </div>
-            </Container>
-        )
-    }
     {
         talks.length > 0 && (
             <Container as="section" class="py-6">

@@ -28,9 +28,9 @@ export const DEFAULT_CONFIGURATION: DefaultConfigurationType = {
   author: {
     avatar,
     name: 'Anup Jambhekar',
-    headline: 'Principal Engineer',
+    headline: '🧙 Principal Code Wizard',
     username: 'anupjambhekar',
-    location: 'Pune, Maharashtra, India',
+    location: 'Pune 🇮🇳',
     pronouns: 'He/Him',
   },
   seo: {
