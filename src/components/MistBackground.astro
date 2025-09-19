@@ -1,0 +1,356 @@
+---
+// Mist Flow Background Component - Simplified for Performance
+---
+
+<!-- Background layers -->
+<div class="stage" aria-hidden="true"></div>
+<div class="grain" aria-hidden="true"></div>
+<div class="sparkles" aria-hidden="true">
+    <!-- Fallback static sparkles for immediate visibility -->
+    <div
+        class="star-sparkle"
+        data-sparkle="1"
+        style="left: 20%; top: 30%; --star-shape: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%); --star-size: 12px; --duration: 2s;"
+    >
+    </div>
+    <div
+        class="star-sparkle"
+        data-sparkle="2"
+        style="left: 80%; top: 20%; --star-shape: polygon(50% 0%, 80% 20%, 100% 50%, 80% 80%, 50% 100%, 20% 80%, 0% 50%, 20% 20%); --star-size: 10px; --duration: 2.5s; animation-delay: 0.5s;"
+    >
+    </div>
+    <div
+        class="star-sparkle"
+        data-sparkle="3"
+        style="left: 60%; top: 70%; --star-shape: polygon(50% 0%, 75% 25%, 100% 50%, 75% 75%, 50% 100%, 25% 75%, 0% 50%, 25% 25%); --star-size: 14px; --duration: 1.8s; animation-delay: 1s;"
+    >
+    </div>
+    <div
+        class="star-sparkle"
+        data-sparkle="4"
+        style="left: 40%; top: 15%; --star-shape: polygon(50% 0%, 70% 30%, 100% 30%, 80% 60%, 90% 100%, 50% 80%, 10% 100%, 20% 60%, 0% 30%, 30% 30%); --star-size: 11px; --duration: 2.2s; animation-delay: 1.5s;"
+    >
+    </div>
+    <div
+        class="star-sparkle"
+        data-sparkle="5"
+        style="left: 15%; top: 80%; --star-shape: polygon(50% 0%, 60% 40%, 100% 40%, 70% 60%, 80% 100%, 50% 80%, 20% 100%, 30% 60%, 0% 40%, 40% 40%); --star-size: 13px; --duration: 2.8s; animation-delay: 2s;"
+    >
+    </div>
+    <div
+        class="star-sparkle"
+        data-sparkle="6"
+        style="left: 85%; top: 60%; --star-shape: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%); --star-size: 9px; --duration: 1.6s; animation-delay: 2.5s;"
+    >
+    </div>
+</div>
+
+<!-- Mist particles -->
+<div class="mist" aria-hidden="true">
+    <span class="particle"></span>
+    <span class="particle layer2"></span>
+    <span class="particle"></span>
+    <span class="particle layer2"></span>
+    <span class="particle"></span>
+    <span class="particle layer2"></span>
+</div>
+
+<style>
+    /* Define theme-specific CSS variables for both light and dark modes */
+    body[data-theme='light'] {
+        --bg-1: #f6f7fb;
+        --bg-2: #ffffff;
+        --mist-color: rgba(255, 205, 95, 0.24);
+        --mist-color-2: rgba(255, 180, 70, 0.18);
+        --ui-color: #6b5600;
+        --grain-opacity: 0.03;
+        --spark-a: rgba(255, 200, 60, 1);
+        --spark-b: rgba(255, 170, 30, 1);
+    }
+    body[data-theme='dark'] {
+        --bg-1: #060912;
+        --bg-2: #0c1122;
+        --mist-color: rgba(70, 225, 255, 0.2);
+        --mist-color-2: rgba(90, 150, 255, 0.15);
+        --ui-color: #9bdcff;
+        --grain-opacity: 0.05;
+        --spark-a: rgba(60, 240, 255, 0.95);
+        --spark-b: rgba(90, 255, 160, 0.95);
+    }
+
+    /* Gradient background layer */
+    .stage {
+        position: fixed;
+        inset: 0;
+        background: linear-gradient(to bottom, var(--bg-2), var(--bg-1));
+        z-index: -10;
+    }
+
+    /* Mist layer */
+    .mist {
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        z-index: -9;
+    }
+
+    /* Mist particles */
+    .particle {
+        position: absolute;
+        width: 56vmax;
+        height: 42vmax;
+        background: radial-gradient(
+                60% 48% at 42% 58%,
+                rgba(0, 0, 0, 0) 0%,
+                var(--mist-color) 10%,
+                rgba(0, 0, 0, 0) 78%
+            ),
+            radial-gradient(
+                52% 44% at 62% 46%,
+                rgba(0, 0, 0, 0) 0%,
+                var(--mist-color-2) 12%,
+                rgba(0, 0, 0, 0) 76%
+            ),
+            radial-gradient(
+                58% 46% at 48% 40%,
+                rgba(0, 0, 0, 0) 0%,
+                var(--mist-color) 14%,
+                rgba(0, 0, 0, 0) 74%
+            );
+        border-radius: 50% / 60%;
+        filter: blur(140px);
+        animation: float linear infinite;
+        animation-direction: alternate;
+        opacity: 0.42;
+        mix-blend-mode: screen;
+        will-change: transform;
+    }
+    .particle.layer2 {
+        width: 70vmax;
+        height: 50vmax;
+        filter: blur(200px);
+        opacity: 0.34;
+        animation-duration: calc(var(--dur, 120s) * 1.25);
+        animation-direction: alternate;
+    }
+
+    /* Mist floating animation */
+    @keyframes float {
+        from {
+            transform: translate3d(var(--x1), var(--y1), 0)
+                rotate(var(--r1, 0deg)) scale(var(--sx1, 1), var(--sy1, 1));
+        }
+        to {
+            transform: translate3d(var(--x2), var(--y2), 0)
+                rotate(var(--r2, 15deg))
+                scale(var(--sx2, 1.15), var(--sy2, 1.1));
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .particle {
+            animation: none;
+        }
+    }
+
+    /* Film grain overlay */
+    .grain {
+        position: fixed;
+        inset: -1px;
+        z-index: -8;
+        pointer-events: none;
+        opacity: var(--grain-opacity);
+        background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200' viewBox='0 0 200 200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0.2'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+        background-size: 300px 300px;
+        mix-blend-mode: soft-light;
+        animation: grainShift 8s steps(8) infinite;
+    }
+    @keyframes grainShift {
+        to {
+            transform: translate3d(-5px, 5px, 0);
+        }
+    }
+
+    /* Sparkles container */
+    .sparkles {
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        z-index: 1;
+    }
+
+    /* Dynamic star sparkles */
+    .star-sparkle {
+        position: absolute;
+        width: var(--star-size, 12px);
+        height: var(--star-size, 12px);
+        background: var(--spark-a);
+        clip-path: var(--star-shape);
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.8);
+        animation: starFadeInOut var(--duration, 3s) ease-in-out infinite;
+        filter: drop-shadow(0 0 8px var(--spark-a));
+        z-index: 2;
+        pointer-events: none;
+    }
+
+    body[data-theme='light'] .star-sparkle {
+        background: #ffd700;
+        filter: drop-shadow(0 0 6px #ffd700) drop-shadow(0 0 12px #ffb347);
+    }
+
+    body[data-theme='dark'] .star-sparkle {
+        background: #00ffff;
+        filter: drop-shadow(0 0 6px #00ffff) drop-shadow(0 0 12px #00ff88);
+    }
+
+    @keyframes starFadeInOut {
+        0% {
+            opacity: 0;
+            transform: translate(-50%, -50%) scale(0.5);
+        }
+        20% {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
+        }
+        80% {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
+        }
+        100% {
+            opacity: 0;
+            transform: translate(-50%, -50%) scale(0.5);
+        }
+    }
+</style>
+
+<script>
+    // --------------------------
+    // THEME INITIALIZATION
+    // --------------------------
+    (function initTheme() {
+        const saved = localStorage.getItem('theme');
+        const prefersDark =
+            window.matchMedia &&
+            window.matchMedia('(prefers-color-scheme: dark)').matches;
+        const theme = saved || (prefersDark ? 'dark' : 'light');
+        document.body.setAttribute('data-theme', theme);
+    })();
+
+    // --------------------------
+    // MIST PARTICLE SETUP
+    // --------------------------
+    const parts = document.querySelectorAll('.particle');
+    const rand = (min: number, max: number) =>
+        Math.random() * (max - min) + min;
+    parts.forEach((p) => {
+        const element = p as HTMLElement;
+        element.style.setProperty('--x1', rand(-0.2, 1.2) * 100 + '%');
+        element.style.setProperty('--y1', rand(-0.2, 1.2) * 100 + '%');
+        element.style.setProperty('--x2', rand(-0.2, 1.2) * 100 + '%');
+        element.style.setProperty('--y2', rand(-0.2, 1.2) * 100 + '%');
+        element.style.setProperty('--r1', rand(-8, 8) + 'deg');
+        element.style.setProperty('--r2', rand(5, 15) + 'deg');
+        element.style.setProperty('--sx1', rand(0.9, 1.05).toString());
+        element.style.setProperty('--sy1', rand(0.9, 1.05).toString());
+        element.style.setProperty('--sx2', rand(1.05, 1.2).toString());
+        element.style.setProperty('--sy2', rand(1.05, 1.2).toString());
+        element.style.animationDuration = rand(90, 130) + 's';
+        element.style.animationDelay = -rand(0, 60) + 's';
+    });
+
+    // --------------------------
+    // 6 STATIC SPARKLES THAT MOVE TO RANDOM POSITIONS
+    // --------------------------
+    function initializeSparkles() {
+        const sparkles = document.querySelectorAll(
+            '.star-sparkle[data-sparkle]'
+        ) as NodeListOf<HTMLElement>;
+        console.log('Found', sparkles.length, 'static sparkles');
+
+        if (sparkles.length === 0) {
+            console.error('No static sparkles found!');
+            return;
+        }
+
+        // Move sparkle to new position when it fades out
+        function moveSparkle(sparkle: HTMLElement, index: number) {
+            // Wait for the full animation cycle to complete
+            const duration =
+                parseFloat(sparkle.style.getPropertyValue('--duration')) * 1000;
+
+            setTimeout(() => {
+                // Stop the current animation
+                sparkle.style.animation = 'none';
+
+                // Change position while invisible
+                const x = rand(10, 90);
+                const y = rand(10, 90);
+                sparkle.style.left = x + '%';
+                sparkle.style.top = y + '%';
+                console.log('Moved sparkle', index + 1, 'to', x + '%', y + '%');
+
+                // Wait a moment then restart animation
+                setTimeout(() => {
+                    void sparkle.offsetWidth; // Trigger reflow
+                    sparkle.style.animation = `starFadeInOut ${duration / 1000}s ease-in-out infinite`;
+                }, 200); // Longer delay to ensure position change is visible
+            }, duration); // Wait for full animation cycle
+        }
+
+        // Start the system
+        function startSparkleSystem() {
+            console.log(
+                'Starting 6 static sparkles that move to random positions...'
+            );
+
+            // Set up position changes for each sparkle
+            sparkles.forEach((sparkle, index) => {
+                // Move each sparkle at different intervals
+                function scheduleMove() {
+                    const delay = rand(3000, 8000); // 3-8 seconds between moves
+                    setTimeout(() => {
+                        moveSparkle(sparkle, index);
+                        scheduleMove();
+                    }, delay);
+                }
+                scheduleMove();
+            });
+        }
+
+        // Start the sparkle system
+        startSparkleSystem();
+    }
+
+    // Wait for DOM to be ready
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initializeSparkles);
+    } else {
+        // DOM is already ready
+        initializeSparkles();
+    }
+
+    // --------------------------
+    // THEME CHANGE LISTENER
+    // --------------------------
+    const observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+            if (
+                mutation.type === 'attributes' &&
+                mutation.attributeName === 'class'
+            ) {
+                // Theme changed, update data-theme attribute
+                const isDark =
+                    document.documentElement.classList.contains('dark');
+                const newTheme = isDark ? 'dark' : 'light';
+                document.body.setAttribute('data-theme', newTheme);
+            }
+        });
+    });
+
+    // Start observing the document element for class changes
+    observer.observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ['class'],
+    });
+</script>
