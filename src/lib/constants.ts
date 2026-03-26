@@ -28,7 +28,7 @@ export const DEFAULT_CONFIGURATION: DefaultConfigurationType = {
   author: {
     avatar,
     name: 'Anup Jambhekar',
-    headline: '🧙 Principal Code Wizard',
+    headline: '🧙 3D Web XR Mixed Reality Engineer',
     username: 'anupjambhekar',
     location: 'Pune 🇮🇳',
     pronouns: 'He/Him',

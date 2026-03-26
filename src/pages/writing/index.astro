@@ -4,11 +4,31 @@ import Author from '@/components/ui/Author.astro';
 import Container from '@/components/Container.astro';
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import { DEFAULT_CONFIGURATION } from '@/lib/constants';
-import PostPreview from '@/components/ui/PostPreview.astro';
+import { formatDate } from '@/lib/utils';
 
-const entry = await getEntry('pages', 'writing');
+const entry = (await getEntry('pages', 'writing'))!;
 const { Content } = await render(entry);
-const posts = await getCollection('posts');
+const posts = (await getCollection('posts')).sort(
+    (a, b) => b.data.date.getTime() - a.data.date.getTime()
+);
+
+const POSTS_INITIAL_COUNT = 4;
+
+const postsWithMeta = await Promise.all(
+    posts.map(async (post) => {
+        const { remarkPluginFrontmatter } = await render(post);
+        return {
+            id: post.id,
+            title: post.data.title,
+            date: post.data.date,
+            dateText: formatDate(post.data.date),
+            minutesRead: remarkPluginFrontmatter.minutesRead,
+        };
+    })
+);
+
+const initialPosts = postsWithMeta.slice(0, POSTS_INITIAL_COUNT);
+const remainingPosts = postsWithMeta.slice(POSTS_INITIAL_COUNT);
 ---
 
 <BaseLayout seo={entry.data.seo}>
@@ -26,10 +46,113 @@ const posts = await getCollection('posts');
 
     <Container as="section" class="py-6">
         <div class="flex flex-col gap-6">
-            <span class="text-headings">Latest posts</span>
-            <ul class="flex flex-col gap-3">
-                {posts.map((post) => <PostPreview entry={post} />)}
+            <span class="text-headings font-semibold">Latest posts</span>
+            <ul id="latest-posts" class="flex flex-col gap-3">
+                {initialPosts.map((post) => (
+                    <li class="py-2">
+                        <div class="flex gap-5">
+                            <div class="relative min-w-22 shrink-0">
+                                <span class="text-muted-foreground text-sm"
+                                    >{post.dateText}</span
+                                >
+                            </div>
+                            <a
+                                href={`/writing/${post.id}/`}
+                                class="flex flex-col gap-3"
+                            >
+                                <div class="flex flex-col">
+                                    <span
+                                        class="text-headings font-semibold"
+                                        >{post.title}</span
+                                    >
+                                    <span class="text-muted-foreground"
+                                        >{post.minutesRead}</span
+                                    >
+                                </div>
+                            </a>
+                        </div>
+                    </li>
+                ))}
             </ul>
+
+            {remainingPosts.length > 0 && (
+                <div class="pt-2 flex">
+                    <button
+                        id="writing-see-more"
+                        type="button"
+                        class="text-muted-foreground hover:text-foreground transition-colors"
+                        data-remaining-posts={JSON.stringify(remainingPosts)}
+                    >
+                        See more
+                    </button>
+                </div>
+            )}
         </div>
     </Container>
+
+    {remainingPosts.length > 0 && (
+        <script>
+            const seeMoreBtn = document.getElementById('writing-see-more');
+            const listEl = document.getElementById('latest-posts');
+
+            if (seeMoreBtn && listEl) {
+                const raw = seeMoreBtn.getAttribute('data-remaining-posts');
+                let remainingPosts = [];
+                try {
+                    remainingPosts = raw ? JSON.parse(raw) : [];
+                } catch {
+                    remainingPosts = [];
+                }
+
+                if (remainingPosts.length) {
+                    seeMoreBtn.addEventListener('click', () => {
+                        for (const post of remainingPosts) {
+                        const li = document.createElement('li');
+                        li.className = 'py-2';
+
+                        const wrap = document.createElement('div');
+                        wrap.className = 'flex gap-5';
+
+                        const dateWrap = document.createElement('div');
+                        dateWrap.className =
+                            'relative min-w-22 shrink-0';
+                        const dateSpan = document.createElement('span');
+                        dateSpan.className =
+                            'text-muted-foreground text-sm';
+                        dateSpan.textContent = post.dateText;
+                        dateWrap.appendChild(dateSpan);
+
+                        const a = document.createElement('a');
+                        a.href = `/writing/${post.id}/`;
+                        a.className = 'flex flex-col gap-3';
+
+                        const textWrap = document.createElement('div');
+                        textWrap.className = 'flex flex-col';
+
+                        const titleSpan = document.createElement('span');
+                        titleSpan.className =
+                            'text-headings font-semibold';
+                        titleSpan.textContent = post.title;
+
+                        const minutesSpan = document.createElement('span');
+                        minutesSpan.className =
+                            'text-muted-foreground';
+                        minutesSpan.textContent = post.minutesRead;
+
+                        textWrap.appendChild(titleSpan);
+                        textWrap.appendChild(minutesSpan);
+                        a.appendChild(textWrap);
+
+                        wrap.appendChild(dateWrap);
+                        wrap.appendChild(a);
+                        li.appendChild(wrap);
+                        listEl.appendChild(li);
+                        }
+
+                        seeMoreBtn.remove();
+                    });
+                }
+            }
+        </script>
+    )}
 </BaseLayout>
