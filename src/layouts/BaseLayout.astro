@@ -5,7 +5,6 @@ import { type Seo } from '@/lib/constants';
 import Header from '@/components/partials/Header.astro';
 import Footer from '@/components/partials/Footer.astro';
 import Head from '@/components/partials/Head.astro';
-import SwitchTheme from '@/components/SwitchTheme.tsx';
 import MistBackground from '@/components/MistBackground.astro';
 
 interface Props {
@@ -16,7 +15,9 @@ const { seo } = Astro.props;
 ---
 
 <html lang="en">
-    <Head seo={seo} />
+    <Head seo={seo}>
+        <slot name="head" />
+    </Head>
     <body class="text-foreground pb-12">
         <MistBackground />
         <Header />
@@ -24,6 +25,5 @@ const { seo } = Astro.props;
             <slot />
         </main>
         <Footer class="relative z-10" />
-        <SwitchTheme client:only="react" />
     </body>
 </html>

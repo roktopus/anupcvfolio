@@ -87,6 +87,62 @@ git push
 
 Visit [github.com/coderdiaz/cvfolio/pulls](https://github.com/coderdiaz/cvfolio/pulls) and create a pull request.
 
+## Add a New Post
+
+Use this workflow to add a post that renders correctly in both post pages and the `/writing` listing views.
+
+1. Create a new folder under `src/content/posts/<your-slug>/`.
+2. Add `index.mdx` with frontmatter:
+   - `title` (required)
+   - `date` (required, `YYYY-MM-DD`)
+   - `seo` object (`title`, `description`, `type`, `keywords`)
+   - `image` (optional hero image path, e.g. `./media/cover.webp`)
+3. Keep all post assets inside that post folder (recommended):
+   - `src/content/posts/<your-slug>/media/...`
+4. Write content in Markdown/MDX:
+   - Use headings (`##`, `###`) and short paragraphs.
+   - Use fenced blocks for chord sheets/tabs, e.g.:
+     ````md
+     ```chords
+     (Em) line one
+     (C) line two
+     ```
+     ````
+     ```
+
+     ```
+5. YouTube links:
+   - Add a plain YouTube URL line (e.g. `https://youtu.be/<id>` or `https://www.youtube.com/watch?v=<id>`).
+   - The post page auto-converts it into an embedded iframe.
+   - The writing thumbnail view uses the first YouTube link as media thumbnail when present.
+6. Hero image behavior:
+   - If `image` is set, it is used as the post hero and as the thumbnail media when no YouTube link is found.
+7. Validate locally before commit:
+   - `bun dev` and open `/writing` and your new post URL.
+   - Check both list and thumbnail views on `/writing`.
+   - Run `bun run build` to catch MDX/content errors.
+
+Minimal post example:
+
+```md
+---
+title: 'My New Post'
+date: 2026-03-27
+image: ./media/cover.webp
+seo:
+  title: 'My New Post'
+  description: 'Short summary of the post.'
+  type: article
+  keywords: blog, writing
+---
+
+https://youtu.be/Yl6h4NaYBWU
+
+## Intro
+
+Write your content here.
+```
+
 ## Check our Documentation
 
 Here is a list of documentation for more in depth information about the cvfolio.

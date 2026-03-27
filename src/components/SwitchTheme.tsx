@@ -5,46 +5,49 @@ const THEME_KEY = 'theme';
 const DARK_THEME = 'dark';
 const LIGHT_THEME = 'light';
 
-export default function SwitchTheme() {
-  const [theme, setTheme] = useState<string | null>(null);
+function resolveInitialTheme() {
+  if (typeof window === 'undefined') return LIGHT_THEME;
+
+  const savedTheme = localStorage.getItem(THEME_KEY);
+  if (savedTheme === DARK_THEME || savedTheme === LIGHT_THEME) {
+    return savedTheme;
+  }
+
+  if (document.documentElement.classList.contains(DARK_THEME)) {
+    return DARK_THEME;
+  }
+
+  return window.matchMedia('(prefers-color-scheme: dark)').matches
+    ? DARK_THEME
+    : LIGHT_THEME;
+}
+
+interface Props {
+  className?: string;
+}
+
+export default function SwitchTheme({ className = '' }: Props) {
+  const [theme, setTheme] = useState<string>(resolveInitialTheme);
 
   useEffect(() => {
-    // Get the initial theme from localStorage or system preference
-    const savedTheme = localStorage.getItem(THEME_KEY);
-    const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    const initialTheme = savedTheme || (systemPrefersDark ? DARK_THEME : LIGHT_THEME);
-    
-    // Apply the theme
-    if (initialTheme === DARK_THEME) {
+    if (theme === DARK_THEME) {
       document.documentElement.classList.add(DARK_THEME);
     } else {
       document.documentElement.classList.remove(DARK_THEME);
     }
-    
-    setTheme(initialTheme);
-  }, []);
+
+    localStorage.setItem(THEME_KEY, theme);
+  }, [theme]);
 
   const toggleTheme = () => {
     const newTheme = theme === DARK_THEME ? LIGHT_THEME : DARK_THEME;
     setTheme(newTheme);
-    localStorage.setItem(THEME_KEY, newTheme);
-    
-    if (newTheme === DARK_THEME) {
-      document.documentElement.classList.add(DARK_THEME);
-    } else {
-      document.documentElement.classList.remove(DARK_THEME);
-    }
   };
-
-  // Don't render anything until we know the theme
-  if (theme === null) {
-    return null;
-  }
 
   return (
     <button
       onClick={toggleTheme}
-      className="hidden md:block fixed z-50 top-0 mt-5 mr-5 right-0 p-2 rounded-full bg-muted-foreground/40 hover:bg-muted-foreground/60 text-headings transition-colors cursor-pointer"
+      className={`p-2 rounded-full bg-white/80 dark:bg-black/80 border border-gray-200 dark:border-gray-800 text-headings hover:bg-white dark:hover:bg-black transition-colors cursor-pointer shadow-lg ${className}`}
       aria-label={`Switch to ${theme === DARK_THEME ? 'light' : 'dark'} theme`}
     >
       {theme === DARK_THEME ? (

@@ -3,7 +3,7 @@ import Container from '@/components/Container.astro';
 import Avatar from '@/components/ui/Avatar.astro';
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import { DEFAULT_CONFIGURATION } from '@/lib/constants';
-import { Image } from 'astro:assets';
+import { Image, getImage } from 'astro:assets';
 import { getCollection, render } from 'astro:content';
 
 export async function getStaticPaths() {
@@ -17,9 +17,27 @@ export async function getStaticPaths() {
 
 const { entry } = Astro.props;
 const { Content } = await render(entry);
+const heroImage = entry.data.image
+  ? await getImage({
+      src: entry.data.image,
+      format: 'webp',
+      width: 1200,
+      height: 675,
+    })
+  : null;
 ---
 
 <BaseLayout seo={entry.data.seo}>
+  {heroImage && (
+    <Fragment slot="head">
+      <link
+        rel="preload"
+        as="image"
+        href={heroImage.src}
+        imagesizes="(max-width: 768px) 100vw, 768px"
+      />
+    </Fragment>
+  )}
   <Container as='section'>
     <article class="flex flex-col gap-6">
       <div class="flex flex-col gap-2">
@@ -37,14 +55,200 @@ const { Content } = await render(entry);
           <Image
             src={entry.data.image}
             alt={entry.data.title}
-            class="object-cover"
+            format="webp"
+            width={1200}
+            height={675}
+            sizes="(max-width: 768px) 100vw, 768px"
+            loading="eager"
+            fetchpriority="high"
+            decoding="sync"
+            class="object-cover w-full h-full"
           />
         </div>
       )}
-      <div class="prose dark:prose-invert">
+      <div class="prose dark:prose-invert max-w-none">
         <Content />
       </div>
     </article>
   </Container>
+  <style is:global>
+    .prose pre.chord-sheet {
+      margin: 1.25rem 0;
+      padding: 1rem 1.1rem;
+      border-radius: 0.85rem;
+      border: 1px solid color-mix(in oklab, var(--color-border) 65%, transparent);
+      background: color-mix(in oklab, var(--color-background) 88%, #111 12%);
+      overflow-x: auto;
+      line-height: 1.8;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+    }
+
+    .dark .prose pre.chord-sheet {
+      background: color-mix(in oklab, #0b1020 82%, #000 18%);
+      border-color: color-mix(in oklab, var(--color-border) 55%, #334155 45%);
+    }
+
+    .prose pre.chord-sheet code {
+      display: block;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+        'Liberation Mono', 'Courier New', monospace;
+      font-size: 0.94rem;
+      white-space: pre;
+      tab-size: 4;
+      color: var(--color-headings);
+      background: transparent;
+      padding: 0;
+    }
+
+    @media (max-width: 768px) {
+      .prose pre.chord-sheet {
+        padding: 0.85rem 0.9rem;
+      }
+
+      .prose pre.chord-sheet code {
+        font-size: 0.88rem;
+      }
+    }
+
+    .youtube-embed {
+      position: relative;
+      display: block;
+      width: 100%;
+      max-width: 100%;
+      border-radius: 0.75rem;
+      overflow: hidden;
+      aspect-ratio: 16 / 9;
+      margin: 1.25rem 0;
+      background: #000;
+    }
+
+    .youtube-embed iframe {
+      width: 100%;
+      height: 100%;
+      border: 0;
+      display: block;
+    }
+  </style>
+  <script>
+    // @ts-nocheck
+    function extractYouTubeId(rawUrl) {
+      try {
+        const url = new URL(rawUrl);
+        const host = url.hostname.replace(/^www\./, '');
+
+        if (host === 'youtu.be') {
+          return url.pathname.slice(1).split('/')[0] || null;
+        }
+
+        if (host === 'youtube.com' || host === 'm.youtube.com') {
+          if (url.pathname === '/watch') {
+            return url.searchParams.get('v');
+          }
+
+          if (url.pathname.startsWith('/shorts/')) {
+            return url.pathname.split('/')[2] || null;
+          }
+
+          if (url.pathname.startsWith('/embed/')) {
+            return url.pathname.split('/')[2] || null;
+          }
+        }
+      } catch {
+        return null;
+      }
+
+      return null;
+    }
+
+    function createYouTubeEmbed(videoId, title) {
+      const wrapper = document.createElement('div');
+      wrapper.className = 'youtube-embed not-prose';
+      wrapper.style.width = '100%';
+      wrapper.style.maxWidth = '100%';
+      wrapper.style.display = 'block';
+      wrapper.style.aspectRatio = '16 / 9';
+      wrapper.style.margin = '1.25rem 0';
+      wrapper.style.background = '#000';
+      wrapper.style.borderRadius = '0.75rem';
+      wrapper.style.overflow = 'hidden';
+
+      const iframe = document.createElement('iframe');
+      iframe.src = `https://www.youtube.com/embed/${videoId}?rel=0`;
+      iframe.allow =
+        'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
+      iframe.referrerPolicy = 'strict-origin-when-cross-origin';
+      iframe.allowFullscreen = true;
+      iframe.loading = 'lazy';
+      iframe.title = title || 'YouTube video player';
+      iframe.style.width = '100%';
+      iframe.style.height = '100%';
+      iframe.style.border = '0';
+      iframe.style.display = 'block';
+
+      wrapper.appendChild(iframe);
+      return wrapper;
+    }
+
+    function hydrateYouTubePreviews() {
+      const prose = document.querySelector('article .prose');
+      if (!prose) return;
+
+      const anchors = prose.querySelectorAll(
+        'a[href*="youtu.be"], a[href*="youtube.com"]'
+      );
+
+      anchors.forEach((anchor) => {
+        if (anchor.dataset.youtubePreviewApplied === 'true') return;
+
+        const href = anchor.getAttribute('href') || '';
+        const videoId = extractYouTubeId(href);
+        if (!videoId) return;
+
+        const paragraph = anchor.closest('p');
+        const isStandaloneLink =
+          paragraph &&
+          paragraph.textContent &&
+          paragraph.textContent.trim() === anchor.textContent?.trim();
+
+        const embed = createYouTubeEmbed(videoId, anchor.textContent?.trim() || '');
+
+        if (isStandaloneLink && paragraph) {
+          paragraph.replaceWith(embed);
+        } else {
+          anchor.insertAdjacentElement('afterend', embed);
+        }
+
+        anchor.dataset.youtubePreviewApplied = 'true';
+      });
+    }
+
+    function hydrateChordSheets() {
+      const prose = document.querySelector('article .prose');
+      if (!prose) return;
+
+      const codeBlocks = prose.querySelectorAll('pre code');
+      codeBlocks.forEach((codeEl) => {
+        const pre = codeEl.closest('pre');
+        if (!pre) return;
+
+        const className = codeEl.className || '';
+        const isChordLanguage = className.includes('language-chords');
+        const looksLikeChordSheet =
+          /\([A-G][#bmadsus0-9/]*\)/.test(codeEl.textContent || '') &&
+          /\n/.test(codeEl.textContent || '');
+
+        if (isChordLanguage || looksLikeChordSheet) {
+          pre.classList.add('chord-sheet');
+        }
+      });
+    }
+
+    hydrateYouTubePreviews();
+    hydrateChordSheets();
+    document.addEventListener('astro:page-load', hydrateYouTubePreviews);
+    document.addEventListener('astro:after-swap', hydrateYouTubePreviews);
+    document.addEventListener('astro:page-load', hydrateChordSheets);
+    document.addEventListener('astro:after-swap', hydrateChordSheets);
+  </script>
 </BaseLayout>
   

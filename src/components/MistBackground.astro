@@ -94,9 +94,10 @@
     /* Mist particles */
     .particle {
         position: absolute;
-        width: 44vmax;
-        height: 34vmax;
-        background: radial-gradient(
+        width: 56vmax;
+        height: 42vmax;
+        background:
+            radial-gradient(
                 60% 48% at 42% 58%,
                 rgba(0, 0, 0, 0) 0%,
                 var(--mist-color) 10%,
@@ -228,5 +229,99 @@
         element.style.setProperty('--sy2', rand(1.05, 1.2).toString());
         element.style.animationDuration = rand(90, 130) + 's';
         element.style.animationDelay = -rand(0, 60) + 's';
+    });
+    // --------------------------
+    // 6 STATIC SPARKLES THAT MOVE TO RANDOM POSITIONS
+    // --------------------------
+    function initializeSparkles() {
+        const sparkles = document.querySelectorAll(
+            '.star-sparkle[data-sparkle]'
+        ) as NodeListOf<HTMLElement>;
+        console.log('Found', sparkles.length, 'static sparkles');
+
+        if (sparkles.length === 0) {
+            console.error('No static sparkles found!');
+            return;
+        }
+
+        // Move sparkle to new position when it fades out
+        function moveSparkle(sparkle: HTMLElement, index: number) {
+            // Wait for the full animation cycle to complete
+            const duration =
+                parseFloat(sparkle.style.getPropertyValue('--duration')) * 1000;
+
+            setTimeout(() => {
+                // Stop the current animation
+                sparkle.style.animation = 'none';
+
+                // Change position while invisible
+                const x = rand(10, 90);
+                const y = rand(10, 90);
+                sparkle.style.left = x + '%';
+                sparkle.style.top = y + '%';
+                console.log('Moved sparkle', index + 1, 'to', x + '%', y + '%');
+
+                // Wait a moment then restart animation
+                setTimeout(() => {
+                    void sparkle.offsetWidth; // Trigger reflow
+                    sparkle.style.animation = `starFadeInOut ${duration / 1000}s ease-in-out infinite`;
+                }, 200); // Longer delay to ensure position change is visible
+            }, duration); // Wait for full animation cycle
+        }
+
+        // Start the system
+        function startSparkleSystem() {
+            console.log(
+                'Starting 6 static sparkles that move to random positions...'
+            );
+
+            // Set up position changes for each sparkle
+            sparkles.forEach((sparkle, index) => {
+                // Move each sparkle at different intervals
+                function scheduleMove() {
+                    const delay = rand(3000, 8000); // 3-8 seconds between moves
+                    setTimeout(() => {
+                        moveSparkle(sparkle, index);
+                        scheduleMove();
+                    }, delay);
+                }
+                scheduleMove();
+            });
+        }
+
+        // Start the sparkle system
+        startSparkleSystem();
+    }
+
+    // Wait for DOM to be ready
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initializeSparkles);
+    } else {
+        // DOM is already ready
+        initializeSparkles();
+    }
+
+    // --------------------------
+    // THEME CHANGE LISTENER
+    // --------------------------
+    const observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+            if (
+                mutation.type === 'attributes' &&
+                mutation.attributeName === 'class'
+            ) {
+                // Theme changed, update data-theme attribute
+                const isDark =
+                    document.documentElement.classList.contains('dark');
+                const newTheme = isDark ? 'dark' : 'light';
+                document.body.setAttribute('data-theme', newTheme);
+            }
+        });
+    });
+
+    // Start observing the document element for class changes
+    observer.observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ['class'],
     });
 </script>
