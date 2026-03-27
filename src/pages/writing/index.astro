@@ -92,10 +92,13 @@ const remainingPosts = postsWithMeta.slice(POSTS_INITIAL_COUNT);
 
     {remainingPosts.length > 0 && (
         <script>
-            const seeMoreBtn = document.getElementById('writing-see-more');
-            const listEl = document.getElementById('latest-posts');
+            function initWritingSeeMore() {
+                const seeMoreBtn = document.getElementById('writing-see-more');
+                const listEl = document.getElementById('latest-posts');
 
-            if (seeMoreBtn && listEl) {
+                if (!seeMoreBtn || !listEl) return;
+                if (seeMoreBtn.dataset.initialized === 'true') return;
+
                 const raw = seeMoreBtn.getAttribute('data-remaining-posts');
                 let remainingPosts = [];
                 try {
@@ -104,9 +107,11 @@ const remainingPosts = postsWithMeta.slice(POSTS_INITIAL_COUNT);
                     remainingPosts = [];
                 }
 
-                if (remainingPosts.length) {
-                    seeMoreBtn.addEventListener('click', () => {
-                        for (const post of remainingPosts) {
+                if (!remainingPosts.length) return;
+
+                seeMoreBtn.dataset.initialized = 'true';
+                seeMoreBtn.addEventListener('click', () => {
+                    for (const post of remainingPosts) {
                         const li = document.createElement('li');
                         li.className = 'py-2';
 
@@ -114,11 +119,9 @@ const remainingPosts = postsWithMeta.slice(POSTS_INITIAL_COUNT);
                         wrap.className = 'flex gap-5';
 
                         const dateWrap = document.createElement('div');
-                        dateWrap.className =
-                            'relative min-w-22 shrink-0';
+                        dateWrap.className = 'relative min-w-22 shrink-0';
                         const dateSpan = document.createElement('span');
-                        dateSpan.className =
-                            'text-muted-foreground text-sm';
+                        dateSpan.className = 'text-muted-foreground text-sm';
                         dateSpan.textContent = post.dateText;
                         dateWrap.appendChild(dateSpan);
 
@@ -130,13 +133,11 @@ const remainingPosts = postsWithMeta.slice(POSTS_INITIAL_COUNT);
                         textWrap.className = 'flex flex-col';
 
                         const titleSpan = document.createElement('span');
-                        titleSpan.className =
-                            'text-headings font-semibold';
+                        titleSpan.className = 'text-headings font-semibold';
                         titleSpan.textContent = post.title;
 
                         const minutesSpan = document.createElement('span');
-                        minutesSpan.className =
-                            'text-muted-foreground';
+                        minutesSpan.className = 'text-muted-foreground';
                         minutesSpan.textContent = post.minutesRead;
 
                         textWrap.appendChild(titleSpan);
@@ -147,12 +148,15 @@ const remainingPosts = postsWithMeta.slice(POSTS_INITIAL_COUNT);
                         wrap.appendChild(a);
                         li.appendChild(wrap);
                         listEl.appendChild(li);
-                        }
+                    }
 
-                        seeMoreBtn.remove();
-                    });
-                }
+                    seeMoreBtn.remove();
+                });
             }
+
+            initWritingSeeMore();
+            document.addEventListener('astro:page-load', initWritingSeeMore);
+            document.addEventListener('astro:after-swap', initWritingSeeMore);
         </script>
     )}
 </BaseLayout>

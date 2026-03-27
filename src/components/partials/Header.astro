@@ -1,5 +1,6 @@
 ---
 const pathname = Astro.url.pathname;
+import SwitchTheme from '@/components/SwitchTheme.tsx';
 
 const isHomePage = pathname === '/';
 const isWritingPage = pathname.startsWith('/writing');
@@ -8,14 +9,16 @@ const isWritingPage = pathname.startsWith('/writing');
 <header
     class="w-full flex justify-center items-center fixed top-0 left-0 right-0 z-50"
 >
-    <div
-        class="w-max mt-5 bg-white/80 dark:bg-black/80 backdrop-blur-md border border-gray-200 dark:border-gray-800 rounded-full p-1 shadow-lg"
-    >
+    <div class="mt-5 flex items-center gap-2">
+        <div
+            class="w-max bg-white/80 dark:bg-black/80 backdrop-blur-md border border-gray-200 dark:border-gray-800 rounded-full p-1 shadow-lg"
+        >
         <nav class="flex items-center">
             <ul class="flex items-center gap-1">
                 <li>
                     <a
                         href="/"
+                        data-astro-prefetch="hover"
                         class:list={[
                             'font-medium transition-colors block px-5 py-2 rounded-full',
                             'text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white',
@@ -27,6 +30,7 @@ const isWritingPage = pathname.startsWith('/writing');
                 <li>
                     <a
                         href="/writing"
+                        data-astro-prefetch="hover"
                         class:list={[
                             'font-medium transition-colors block px-5 py-2 rounded-full',
                             'text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white',
@@ -37,5 +41,7 @@ const isWritingPage = pathname.startsWith('/writing');
                 </li>
             </ul>
         </nav>
+        </div>
+        <SwitchTheme className="shrink-0" client:only="react" />
     </div>
 </header>

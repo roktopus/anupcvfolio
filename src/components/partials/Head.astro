@@ -1,5 +1,6 @@
 ---
 import { getImage, Font } from 'astro:assets';
+import { ClientRouter } from 'astro:transitions';
 import type { Seo } from '@/lib/constants'
 import { DEFAULT_CONFIGURATION } from '@/lib/constants';
 import { generateAbsoluteUrl } from '@/lib/utils';
@@ -15,6 +16,7 @@ const image = await getImage({ src: seo?.image || defaultSeo.image, format: 'jpg
 const seoImage = generateAbsoluteUrl(image.src);
 ---
 <head>
+  <ClientRouter />
   <meta charset="utf-8" />
   <link rel="sitemap" href="/sitemap-index.xml" />
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />

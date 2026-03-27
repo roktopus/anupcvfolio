@@ -159,9 +159,9 @@ const PATENT_ICON_SVG = `
 
     <div class="grid grid-cols-1 gap-4">
         <!-- Companies Section -->
-        <div class="flex items-center justify-between">
-            <span class="text-sm text-muted-foreground">Companies</span>
-            <div class="flex gap-2">
+        <div class="flex items-start justify-between gap-3">
+            <span class="text-sm text-muted-foreground shrink-0">Companies</span>
+            <div class="flex flex-wrap justify-end gap-2 max-w-[70%] sm:max-w-none">
                 {
                     companies.map(async (company) => {
                         const logoImage = await getCompanyLogo(
@@ -172,7 +172,7 @@ const PATENT_ICON_SVG = `
                                 href={company.data.url}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                class="group relative p-2 rounded-lg hover:bg-muted-foreground/20 transition-colors"
+                                class="group relative p-2 rounded-lg hover:bg-muted-foreground/20 transition-colors shrink-0"
                                 title={company.data.name}
                             >
                                 {logoImage.src.startsWith('http') ||
@@ -180,7 +180,7 @@ const PATENT_ICON_SVG = `
                                     <img
                                         src={logoImage.src}
                                         alt={`${company.data.name} Logo`}
-                                        class="w-6 h-6 opacity-70 group-hover:opacity-100 transition-opacity"
+                                        class="w-6 h-6 shrink-0 opacity-70 group-hover:opacity-100 transition-opacity"
                                     />
                                 ) : (
                                     <Image
@@ -188,7 +188,7 @@ const PATENT_ICON_SVG = `
                                         alt={`${company.data.name} Logo`}
                                         width={24}
                                         height={24}
-                                        class="w-6 h-6 opacity-70 group-hover:opacity-100 transition-opacity"
+                                        class="w-6 h-6 shrink-0 opacity-70 group-hover:opacity-100 transition-opacity"
                                     />
                                 )}
                             </a>
@@ -199,9 +199,9 @@ const PATENT_ICON_SVG = `
         </div>
 
         <!-- Certifications Section -->
-        <div class="flex items-center justify-between">
-            <span class="text-sm text-muted-foreground">Certifications</span>
-            <div class="flex gap-2">
+        <div class="flex items-start justify-between gap-3">
+            <span class="text-sm text-muted-foreground shrink-0">Certifications</span>
+            <div class="flex flex-wrap justify-end gap-2 max-w-[70%] sm:max-w-none">
                 {
                     certifications.map(async (certification) => {
                         const iconImage = await getCertificationIcon(
@@ -209,14 +209,14 @@ const PATENT_ICON_SVG = `
                         );
                         return (
                             <div
-                                class="group relative p-2 rounded-lg hover:bg-muted-foreground/20 transition-colors"
+                                class="group relative p-2 rounded-lg hover:bg-muted-foreground/20 transition-colors shrink-0"
                                 title={certification.data.name}
                             >
                                 {iconImage.src.startsWith('http') ? (
                                     <img
                                         src={iconImage.src}
                                         alt={certification.data.name}
-                                        class="w-6 h-6 opacity-70 group-hover:opacity-100 transition-opacity"
+                                        class="w-6 h-6 shrink-0 opacity-70 group-hover:opacity-100 transition-opacity"
                                     />
                                 ) : (
                                     <Image
@@ -224,7 +224,7 @@ const PATENT_ICON_SVG = `
                                         alt={certification.data.name}
                                         width={24}
                                         height={24}
-                                        class="w-6 h-6 opacity-70 group-hover:opacity-100 transition-opacity"
+                                        class="w-6 h-6 shrink-0 opacity-70 group-hover:opacity-100 transition-opacity"
                                     />
                                 )}
                             </div>
@@ -235,14 +235,14 @@ const PATENT_ICON_SVG = `
         </div>
 
         <!-- Patents Section -->
-        <div class="flex items-center justify-between">
-            <span class="text-sm text-muted-foreground">Patents</span>
-            <div class="flex gap-2">
+        <div class="flex items-start justify-between gap-3">
+            <span class="text-sm text-muted-foreground shrink-0">Patents</span>
+            <div class="flex flex-wrap justify-end gap-2 max-w-[70%] sm:max-w-none">
                 <a
                     href="https://image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/20240019995"
                     target="_blank"
                     rel="noopener noreferrer"
-                    class="group relative p-2 rounded-lg hover:bg-muted-foreground/20 transition-colors"
+                    class="group relative p-2 rounded-lg hover:bg-muted-foreground/20 transition-colors shrink-0"
                     title="USER INTERFACE (UI) FOR POWER SYSTEM CONTROLLER DEVICE"
                 >
                     <div
@@ -254,22 +254,22 @@ const PATENT_ICON_SVG = `
         </div>
 
         <!-- Cloud Platforms Section -->
-        <div class="flex items-center justify-between">
-            <span class="text-sm text-muted-foreground">Cloud Platforms</span>
-            <div class="flex gap-2">
+        <div class="flex items-start justify-between gap-3">
+            <span class="text-sm text-muted-foreground shrink-0">Cloud Platforms</span>
+            <div class="flex flex-wrap justify-end gap-2 max-w-[70%] sm:max-w-none">
                 {
                     cloudPlatforms.map((platform) => (
                         <a
                             href={platform.data.url}
                             target="_blank"
                             rel="noopener noreferrer"
-                            class="group relative p-2 rounded-lg hover:bg-muted-foreground/20 transition-colors"
+                            class="group relative p-2 rounded-lg hover:bg-muted-foreground/20 transition-colors shrink-0"
                             title={platform.data.name}
                         >
                             <img
                                 src={platform.data.icon}
                                 alt={`${platform.data.name} Logo`}
-                                class="w-6 h-6 opacity-70 group-hover:opacity-100 transition-opacity"
+                                class="w-6 h-6 shrink-0 opacity-70 group-hover:opacity-100 transition-opacity"
                             />
                         </a>
                     ))
@@ -278,24 +278,24 @@ const PATENT_ICON_SVG = `
         </div>
 
         <!-- Programming Languages Section -->
-        <div class="flex items-center justify-between">
+        <div class="flex items-start justify-between gap-3">
             <span class="text-sm text-muted-foreground"
                 >Programming Languages</span
             >
-            <div class="flex gap-2">
+            <div class="flex flex-wrap justify-end gap-2 max-w-[70%] sm:max-w-none">
                 {
                     programmingLanguages.map((language) => (
                         <a
                             href={language.data.url}
                             target="_blank"
                             rel="noopener noreferrer"
-                            class="group relative p-2 rounded-lg hover:bg-muted-foreground/20 transition-colors"
+                            class="group relative p-2 rounded-lg hover:bg-muted-foreground/20 transition-colors shrink-0"
                             title={language.data.name}
                         >
                             <img
                                 src={language.data.icon}
                                 alt={`${language.data.name} Logo`}
-                                class="w-6 h-6 opacity-70 group-hover:opacity-100 transition-opacity"
+                                class="w-6 h-6 shrink-0 opacity-70 group-hover:opacity-100 transition-opacity"
                             />
                         </a>
                     ))
@@ -304,24 +304,24 @@ const PATENT_ICON_SVG = `
         </div>
 
         <!-- Frameworks & Libraries Section -->
-        <div class="flex items-center justify-between">
+        <div class="flex items-start justify-between gap-3">
             <span class="text-sm text-muted-foreground"
                 >Frameworks & Libraries</span
             >
-            <div class="flex gap-2">
+            <div class="flex flex-wrap justify-end gap-2 max-w-[70%] sm:max-w-none">
                 {
                     frameworks.map((framework) => (
                         <a
                             href={framework.data.url}
                             target="_blank"
                             rel="noopener noreferrer"
-                            class="group relative p-2 rounded-lg hover:bg-muted-foreground/20 transition-colors"
+                            class="group relative p-2 rounded-lg hover:bg-muted-foreground/20 transition-colors shrink-0"
                             title={framework.data.name}
                         >
                             <img
                                 src={framework.data.icon}
                                 alt={`${framework.data.name} Logo`}
-                                class="w-6 h-6 opacity-70 group-hover:opacity-100 transition-opacity"
+                                class="w-6 h-6 shrink-0 opacity-70 group-hover:opacity-100 transition-opacity"
                             />
                         </a>
                     ))
@@ -330,22 +330,22 @@ const PATENT_ICON_SVG = `
         </div>
 
         <!-- Databases Section -->
-        <div class="flex items-center justify-between">
-            <span class="text-sm text-muted-foreground">Databases</span>
-            <div class="flex gap-2">
+        <div class="flex items-start justify-between gap-3">
+            <span class="text-sm text-muted-foreground shrink-0">Databases</span>
+            <div class="flex flex-wrap justify-end gap-2 max-w-[70%] sm:max-w-none">
                 {
                     databases.map((database) => (
                         <a
                             href={database.data.url}
                             target="_blank"
                             rel="noopener noreferrer"
-                            class="group relative p-2 rounded-lg hover:bg-muted-foreground/20 transition-colors"
+                            class="group relative p-2 rounded-lg hover:bg-muted-foreground/20 transition-colors shrink-0"
                             title={database.data.name}
                         >
                             <img
                                 src={database.data.icon}
                                 alt={`${database.data.name} Logo`}
-                                class="w-6 h-6 opacity-70 group-hover:opacity-100 transition-opacity"
+                                class="w-6 h-6 shrink-0 opacity-70 group-hover:opacity-100 transition-opacity"
                             />
                         </a>
                     ))
@@ -354,24 +354,24 @@ const PATENT_ICON_SVG = `
         </div>
 
         <!-- Deployment & Version Control Section -->
-        <div class="flex items-center justify-between">
+        <div class="flex items-start justify-between gap-3">
             <span class="text-sm text-muted-foreground"
                 >Deployment & Version Control</span
             >
-            <div class="flex gap-2">
+            <div class="flex flex-wrap justify-end gap-2 max-w-[70%] sm:max-w-none">
                 {
                     deploymentTools.map((tool) => (
                         <a
                             href={tool.data.url}
                             target="_blank"
                             rel="noopener noreferrer"
-                            class="group relative p-2 rounded-lg hover:bg-muted-foreground/20 transition-colors"
+                            class="group relative p-2 rounded-lg hover:bg-muted-foreground/20 transition-colors shrink-0"
                             title={tool.data.name}
                         >
                             <img
                                 src={tool.data.icon}
                                 alt={`${tool.data.name} Logo`}
-                                class="w-6 h-6 opacity-70 group-hover:opacity-100 transition-opacity"
+                                class="w-6 h-6 shrink-0 opacity-70 group-hover:opacity-100 transition-opacity"
                             />
                         </a>
                     ))
