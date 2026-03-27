@@ -16,22 +16,55 @@ const posts = (await getCollection('posts')).sort(
     (a, b) => b.data.date.getTime() - a.data.date.getTime()
 );
 
-const POSTS_INITIAL_COUNT = 4;
+const POSTS_INITIAL_COUNT = 6;
 
 const postsDir = path.join(
     fileURLToPath(new URL('../../content/posts', import.meta.url))
 );
 
-function extractYouTubeIdFromMdx(mdx: string): string | null {
-    // Handles: https://youtu.be/<id>, youtube.com/watch?v=<id>, youtube.com/shorts/<id>
-    const youtuBe = mdx.match(/youtu\.be\/([A-Za-z0-9_-]{11})/);
-    if (youtuBe?.[1]) return youtuBe[1];
+function extractFirstYouTubeUrlFromMdx(mdx: string): string | null {
+    const match = mdx.match(
+        /https?:\/\/(?:www\.)?(?:m\.)?(?:youtu\.be|youtube\.com)\/[^\s<)"']+/i
+    );
+    return match?.[0] ?? null;
+}
 
-    const watch = mdx.match(/[?&]v=([A-Za-z0-9_-]{11})/);
-    if (watch?.[1]) return watch[1];
+function extractYouTubeId(rawUrl: string): string | null {
+    const normalized = rawUrl.replace(/[),.;!?]+$/, '');
 
-    const shorts = mdx.match(/\/shorts\/([A-Za-z0-9_-]{11})/);
-    if (shorts?.[1]) return shorts[1];
+    try {
+        const url = new URL(normalized);
+        const host = url.hostname.replace(/^www\./, '');
+
+        if (host === 'youtu.be') {
+            const id = url.pathname.slice(1).split('/')[0] || null;
+            return id && id.length === 11 ? id : null;
+        }
+
+        if (host === 'youtube.com' || host === 'm.youtube.com') {
+            if (url.pathname === '/watch') {
+                const id = url.searchParams.get('v');
+                return id && id.length === 11 ? id : null;
+            }
+
+            if (url.pathname.startsWith('/shorts/')) {
+                const id = url.pathname.split('/')[2] || null;
+                return id && id.length === 11 ? id : null;
+            }
+
+            if (url.pathname.startsWith('/embed/')) {
+                const id = url.pathname.split('/')[2] || null;
+                return id && id.length === 11 ? id : null;
+            }
+
+            if (url.pathname.startsWith('/live/')) {
+                const id = url.pathname.split('/')[2] || null;
+                return id && id.length === 11 ? id : null;
+            }
+        }
+    } catch {
+        return null;
+    }
 
     return null;
 }
@@ -41,7 +74,8 @@ async function getPostYouTubeEmbedSrc(postId: string) {
 
     try {
         const mdx = await fs.readFile(filePath, 'utf-8');
-        const youtubeId = extractYouTubeIdFromMdx(mdx);
+        const youtubeUrl = extractFirstYouTubeUrlFromMdx(mdx);
+        const youtubeId = youtubeUrl ? extractYouTubeId(youtubeUrl) : null;
         return youtubeId
             ? `https://www.youtube.com/embed/${youtubeId}?rel=0&modestbranding=1`
             : null;
@@ -163,7 +197,7 @@ const remainingPosts = postsWithMeta.slice(POSTS_INITIAL_COUNT);
 
             <div
                 id="latest-posts-grid"
-                class="gap-4 mt-4 sm:grid sm:grid-cols-2 lg:grid-cols-3"
+                class="grid grid-cols-1 gap-4 mt-4 sm:grid-cols-2 lg:grid-cols-3"
             >
                 {initialPosts.map((post) => (
                     <a
