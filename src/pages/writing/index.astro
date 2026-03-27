@@ -5,6 +5,10 @@ import Container from '@/components/Container.astro';
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import { DEFAULT_CONFIGURATION } from '@/lib/constants';
 import { formatDate } from '@/lib/utils';
+import { getImage } from 'astro:assets';
+import fs from 'node:fs/promises';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 const entry = (await getEntry('pages', 'writing'))!;
 const { Content } = await render(entry);
@@ -14,15 +18,60 @@ const posts = (await getCollection('posts')).sort(
 
 const POSTS_INITIAL_COUNT = 4;
 
+const postsDir = path.join(
+    fileURLToPath(new URL('../../content/posts', import.meta.url))
+);
+
+function extractYouTubeIdFromMdx(mdx: string): string | null {
+    // Handles: https://youtu.be/<id>, youtube.com/watch?v=<id>, youtube.com/shorts/<id>
+    const youtuBe = mdx.match(/youtu\.be\/([A-Za-z0-9_-]{11})/);
+    if (youtuBe?.[1]) return youtuBe[1];
+
+    const watch = mdx.match(/[?&]v=([A-Za-z0-9_-]{11})/);
+    if (watch?.[1]) return watch[1];
+
+    const shorts = mdx.match(/\/shorts\/([A-Za-z0-9_-]{11})/);
+    if (shorts?.[1]) return shorts[1];
+
+    return null;
+}
+
+async function getPostYouTubeEmbedSrc(postId: string) {
+    const filePath = path.join(postsDir, postId, 'index.mdx');
+
+    try {
+        const mdx = await fs.readFile(filePath, 'utf-8');
+        const youtubeId = extractYouTubeIdFromMdx(mdx);
+        return youtubeId
+            ? `https://www.youtube.com/embed/${youtubeId}?rel=0&modestbranding=1`
+            : null;
+    } catch {
+        return null;
+    }
+}
+
 const postsWithMeta = await Promise.all(
     posts.map(async (post) => {
         const { remarkPluginFrontmatter } = await render(post);
+        const youtubeEmbedSrc = await getPostYouTubeEmbedSrc(post.id);
+
+        const heroThumb = post.data.image
+            ? await getImage({
+                  src: post.data.image,
+                  format: 'webp',
+                  width: 800,
+                  height: 450,
+              })
+            : null;
+
         return {
             id: post.id,
             title: post.data.title,
             date: post.data.date,
             dateText: formatDate(post.data.date),
             minutesRead: remarkPluginFrontmatter.minutesRead,
+            heroThumbSrc: heroThumb?.src ?? null,
+            youtubeEmbedSrc,
         };
     })
 );
@@ -46,34 +95,300 @@ const remainingPosts = postsWithMeta.slice(POSTS_INITIAL_COUNT);
 
     <Container as="section" class="py-6">
         <div class="flex flex-col gap-6">
-            <span class="text-headings font-semibold">Latest posts</span>
-            <ul id="latest-posts" class="flex flex-col gap-3">
-                {initialPosts.map((post) => (
-                    <li class="py-2">
-                        <div class="flex gap-5">
-                            <div class="relative min-w-22 shrink-0">
-                                <span class="text-muted-foreground text-sm"
-                                    >{post.dateText}</span
-                                >
-                            </div>
-                            <a
-                                href={`/writing/${post.id}/`}
-                                class="flex flex-col gap-3"
-                            >
-                                <div class="flex flex-col">
-                                    <span
-                                        class="text-headings font-semibold"
-                                        >{post.title}</span
-                                    >
-                                    <span class="text-muted-foreground"
-                                        >{post.minutesRead}</span
-                                    >
-                                </div>
-                            </a>
-                        </div>
-                    </li>
-                ))}
+            <div class="flex items-center justify-between gap-4">
+                <span class="text-headings font-semibold">Latest posts</span>
+                <div class="flex items-center gap-2">
+                    <button
+                        id="writing-view-list"
+                        type="button"
+                        class="p-2 rounded-full border border-border/60 bg-muted/20 hover:bg-muted/40 transition-colors text-headings font-semibold"
+                        aria-pressed="true"
+                        data-view="list"
+                        aria-label="List view"
+                    >
+                        <svg
+                            viewBox="0 0 24 24"
+                            width="18"
+                            height="18"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            aria-hidden="true"
+                        >
+                            <line x1="8" y1="6" x2="21" y2="6" />
+                            <line x1="8" y1="12" x2="21" y2="12" />
+                            <line x1="8" y1="18" x2="21" y2="18" />
+                            <line x1="3" y1="6" x2="3.01" y2="6" />
+                            <line x1="3" y1="12" x2="3.01" y2="12" />
+                            <line x1="3" y1="18" x2="3.01" y2="18" />
+                        </svg>
+                    </button>
+                    <button
+                        id="writing-view-thumbs"
+                        type="button"
+                        class="p-2 rounded-full border border-border/60 bg-muted/20 hover:bg-muted/40 transition-colors text-muted-foreground"
+                        aria-pressed="false"
+                        data-view="thumbs"
+                        aria-label="Thumbnail view"
+                    >
+                        <svg
+                            viewBox="0 0 24 24"
+                            width="18"
+                            height="18"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            aria-hidden="true"
+                        >
+                            <rect x="3" y="3" width="7" height="7" rx="1" />
+                            <rect x="14" y="3" width="7" height="7" rx="1" />
+                            <rect x="3" y="14" width="7" height="7" rx="1" />
+                            <rect x="14" y="14" width="7" height="7" rx="1" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <ul
+                id="latest-posts-list"
+                class="hidden flex flex-col gap-3"
+                data-initial-posts={JSON.stringify(initialPosts)}
+                data-list-rendered="false"
+            >
             </ul>
+
+            <div
+                id="latest-posts-grid"
+                class="gap-4 mt-4 sm:grid sm:grid-cols-2 lg:grid-cols-3"
+            >
+                {initialPosts.map((post) => (
+                    <a
+                        href={`/writing/${post.id}/`}
+                        class="group block rounded-xl border border-border/60 bg-muted/20 hover:bg-muted/40 transition-colors overflow-hidden"
+                    >
+                        <div class="relative aspect-video w-full bg-black/10">
+                            {post.youtubeEmbedSrc ? (
+                                <iframe
+                                    src={post.youtubeEmbedSrc}
+                                    loading="lazy"
+                                    class="w-full h-full"
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                    referrerpolicy="strict-origin-when-cross-origin"
+                                    allowfullscreen
+                                />
+                            ) : post.heroThumbSrc ? (
+                                <img
+                                    src={post.heroThumbSrc}
+                                    alt={`${post.title} thumbnail`}
+                                    loading="lazy"
+                                    decoding="async"
+                                    class="w-full h-full object-cover"
+                                />
+                            ) : (
+                                <div class="w-full h-full flex items-center justify-center text-muted-foreground">
+                                    No media
+                                </div>
+                            )}
+                            <div class="absolute inset-0 pointer-events-none bg-gradient-to-t from-black/30 via-black/0 to-black/0" />
+                        </div>
+                        <div class="p-4 flex flex-col gap-2">
+                            <span class="text-headings font-semibold">
+                                {post.title}
+                            </span>
+                            <span class="text-muted-foreground text-sm">
+                                {post.dateText} · {post.minutesRead}
+                            </span>
+                        </div>
+                    </a>
+                ))}
+            </div>
+
+            <script>
+                // @ts-nocheck
+                const WRITING_VIEW_KEY = 'writing_view';
+
+                function hydrateWritingViewToggle() {
+                    const listBtn = document.getElementById(
+                        'writing-view-list'
+                    );
+                    const thumbsBtn = document.getElementById(
+                        'writing-view-thumbs'
+                    );
+                    const listEl = document.getElementById(
+                        'latest-posts-list'
+                    );
+                    const gridEl = document.getElementById(
+                        'latest-posts-grid'
+                    );
+
+                    if (!listBtn || !thumbsBtn || !listEl || !gridEl)
+                        return;
+
+                    const setListView = () => {
+                        // Use inline display to avoid Tailwind responsive utility conflicts.
+                        listEl.style.display = 'flex';
+                        gridEl.style.display = 'none';
+                        listBtn.setAttribute('aria-pressed', 'true');
+                        thumbsBtn.setAttribute(
+                            'aria-pressed',
+                            'false'
+                        );
+
+                        listBtn.classList.add('text-headings', 'font-semibold');
+                        listBtn.classList.remove('text-muted-foreground');
+                        thumbsBtn.classList.add('text-muted-foreground');
+                        thumbsBtn.classList.remove('text-headings', 'font-semibold');
+                    };
+
+                    const setThumbsView = () => {
+                        listEl.style.display = 'none';
+                        gridEl.style.display = '';
+                        listBtn.setAttribute('aria-pressed', 'false');
+                        thumbsBtn.setAttribute('aria-pressed', 'true');
+
+                        thumbsBtn.classList.add('text-headings', 'font-semibold');
+                        thumbsBtn.classList.remove('text-muted-foreground');
+                        listBtn.classList.add('text-muted-foreground');
+                        listBtn.classList.remove('text-headings', 'font-semibold');
+                    };
+
+                    // Default to thumbs view (per request).
+                    // We only apply persisted preference after the user clicks.
+                    setThumbsView();
+
+                    function ensureListRendered() {
+                        if (listEl.dataset.listRendered === 'true') return;
+                        if (listEl.style.display === 'none') return;
+
+                        const pendingKey = 'writing_pending_list_posts';
+                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                        const pending = (window[pendingKey] =
+                            window[pendingKey] || []);
+
+                        const raw = listEl.getAttribute('data-initial-posts') || '[]';
+                        let initial = [];
+                        try {
+                            initial = JSON.parse(raw);
+                        } catch {
+                            initial = [];
+                        }
+
+                        for (const post of initial) {
+                            const li = document.createElement('li');
+                            li.className = 'py-2';
+
+                            const wrap = document.createElement('div');
+                            wrap.className = 'flex gap-5';
+
+                            const dateWrap = document.createElement('div');
+                            dateWrap.className =
+                                'relative min-w-22 shrink-0';
+                            const dateSpan = document.createElement('span');
+                            dateSpan.className = 'text-muted-foreground text-sm';
+                            dateSpan.textContent = post.dateText;
+                            dateWrap.appendChild(dateSpan);
+
+                            const a = document.createElement('a');
+                            a.href = `/writing/${post.id}/`;
+                            a.className = 'flex flex-col gap-3';
+
+                            const textWrap = document.createElement('div');
+                            textWrap.className = 'flex flex-col';
+
+                            const titleSpan = document.createElement('span');
+                            titleSpan.className = 'text-headings font-semibold';
+                            titleSpan.textContent = post.title;
+
+                            const minutesSpan = document.createElement('span');
+                            minutesSpan.className = 'text-muted-foreground';
+                            minutesSpan.textContent = post.minutesRead;
+
+                            textWrap.appendChild(titleSpan);
+                            textWrap.appendChild(minutesSpan);
+                            a.appendChild(textWrap);
+
+                            wrap.appendChild(dateWrap);
+                            wrap.appendChild(a);
+                            li.appendChild(wrap);
+                            listEl.appendChild(li);
+                        }
+
+                        for (const post of pending) {
+                            const li = document.createElement('li');
+                            li.className = 'py-2';
+
+                            const wrap = document.createElement('div');
+                            wrap.className = 'flex gap-5';
+
+                            const dateWrap = document.createElement('div');
+                            dateWrap.className =
+                                'relative min-w-22 shrink-0';
+                            const dateSpan = document.createElement('span');
+                            dateSpan.className = 'text-muted-foreground text-sm';
+                            dateSpan.textContent = post.dateText;
+                            dateWrap.appendChild(dateSpan);
+
+                            const a = document.createElement('a');
+                            a.href = `/writing/${post.id}/`;
+                            a.className = 'flex flex-col gap-3';
+
+                            const textWrap = document.createElement('div');
+                            textWrap.className = 'flex flex-col';
+
+                            const titleSpan = document.createElement('span');
+                            titleSpan.className = 'text-headings font-semibold';
+                            titleSpan.textContent = post.title;
+
+                            const minutesSpan = document.createElement('span');
+                            minutesSpan.className = 'text-muted-foreground';
+                            minutesSpan.textContent = post.minutesRead;
+
+                            textWrap.appendChild(titleSpan);
+                            textWrap.appendChild(minutesSpan);
+                            a.appendChild(textWrap);
+
+                            wrap.appendChild(dateWrap);
+                            wrap.appendChild(a);
+                            li.appendChild(wrap);
+                            listEl.appendChild(li);
+                        }
+
+                        // Clear queue after we render.
+                        window[pendingKey] = [];
+
+                        listEl.dataset.listRendered = 'true';
+                    }
+
+                    if (listBtn.dataset.hydrated !== 'true') {
+                        listBtn.addEventListener('click', () => {
+                            localStorage.setItem(WRITING_VIEW_KEY, 'list');
+                            setListView();
+                            ensureListRendered();
+                        });
+
+                        thumbsBtn.addEventListener('click', () => {
+                            localStorage.setItem(WRITING_VIEW_KEY, 'thumbs');
+                            setThumbsView();
+                        });
+
+                        listBtn.dataset.hydrated = 'true';
+                    }
+                }
+
+                hydrateWritingViewToggle();
+                document.addEventListener(
+                    'astro:page-load',
+                    hydrateWritingViewToggle
+                );
+                document.addEventListener(
+                    'astro:after-swap',
+                    hydrateWritingViewToggle
+                );
+            </script>
 
             {remainingPosts.length > 0 && (
                 <div class="pt-2 flex">
@@ -92,11 +407,13 @@ const remainingPosts = postsWithMeta.slice(POSTS_INITIAL_COUNT);
 
     {remainingPosts.length > 0 && (
         <script>
+            // @ts-nocheck
             function initWritingSeeMore() {
                 const seeMoreBtn = document.getElementById('writing-see-more');
-                const listEl = document.getElementById('latest-posts');
+                const listEl = document.getElementById('latest-posts-list');
+                const gridEl = document.getElementById('latest-posts-grid');
 
-                if (!seeMoreBtn || !listEl) return;
+                if (!seeMoreBtn || !listEl || !gridEl) return;
                 if (seeMoreBtn.dataset.initialized === 'true') return;
 
                 const raw = seeMoreBtn.getAttribute('data-remaining-posts');
@@ -112,42 +429,126 @@ const remainingPosts = postsWithMeta.slice(POSTS_INITIAL_COUNT);
                 seeMoreBtn.dataset.initialized = 'true';
                 seeMoreBtn.addEventListener('click', () => {
                     for (const post of remainingPosts) {
-                        const li = document.createElement('li');
-                        li.className = 'py-2';
+                        const listIsVisible =
+                            listEl.style.display !== 'none';
+                        const listIsRendered =
+                            listEl.dataset.listRendered === 'true';
+                        const shouldRenderListItem =
+                            listIsVisible && listIsRendered;
 
-                        const wrap = document.createElement('div');
-                        wrap.className = 'flex gap-5';
+                        const pendingKey =
+                            'writing_pending_list_posts';
+                        const pending =
+                            (window[pendingKey] =
+                                window[pendingKey] || []);
 
-                        const dateWrap = document.createElement('div');
-                        dateWrap.className = 'relative min-w-22 shrink-0';
-                        const dateSpan = document.createElement('span');
-                        dateSpan.className = 'text-muted-foreground text-sm';
-                        dateSpan.textContent = post.dateText;
-                        dateWrap.appendChild(dateSpan);
+                        if (shouldRenderListItem) {
+                            // List view item
+                            const li = document.createElement('li');
+                            li.className = 'py-2';
 
-                        const a = document.createElement('a');
-                        a.href = `/writing/${post.id}/`;
-                        a.className = 'flex flex-col gap-3';
+                            const wrap = document.createElement('div');
+                            wrap.className = 'flex gap-5';
 
-                        const textWrap = document.createElement('div');
-                        textWrap.className = 'flex flex-col';
+                            const dateWrap = document.createElement('div');
+                            dateWrap.className =
+                                'relative min-w-22 shrink-0';
+                            const dateSpan = document.createElement('span');
+                            dateSpan.className =
+                                'text-muted-foreground text-sm';
+                            dateSpan.textContent = post.dateText;
+                            dateWrap.appendChild(dateSpan);
 
-                        const titleSpan = document.createElement('span');
-                        titleSpan.className = 'text-headings font-semibold';
-                        titleSpan.textContent = post.title;
+                            const a = document.createElement('a');
+                            a.href = `/writing/${post.id}/`;
+                            a.className = 'flex flex-col gap-3';
 
-                        const minutesSpan = document.createElement('span');
-                        minutesSpan.className = 'text-muted-foreground';
-                        minutesSpan.textContent = post.minutesRead;
+                            const textWrap = document.createElement('div');
+                            textWrap.className = 'flex flex-col';
 
-                        textWrap.appendChild(titleSpan);
-                        textWrap.appendChild(minutesSpan);
-                        a.appendChild(textWrap);
+                            const titleSpan = document.createElement('span');
+                            titleSpan.className =
+                                'text-headings font-semibold';
+                            titleSpan.textContent = post.title;
 
-                        wrap.appendChild(dateWrap);
-                        wrap.appendChild(a);
-                        li.appendChild(wrap);
-                        listEl.appendChild(li);
+                            const minutesSpan = document.createElement('span');
+                            minutesSpan.className =
+                                'text-muted-foreground';
+                            minutesSpan.textContent =
+                                post.minutesRead;
+
+                            textWrap.appendChild(titleSpan);
+                            textWrap.appendChild(minutesSpan);
+                            a.appendChild(textWrap);
+
+                            wrap.appendChild(dateWrap);
+                            wrap.appendChild(a);
+                            li.appendChild(wrap);
+                            listEl.appendChild(li);
+                        } else {
+                            pending.push(post);
+                        }
+
+                        // Thumbnail grid item
+                        const gridCard = document.createElement('a');
+                        gridCard.href = `/writing/${post.id}/`;
+                        gridCard.className =
+                            'group block rounded-xl border border-border/60 bg-muted/20 hover:bg-muted/40 transition-colors overflow-hidden';
+
+                        const mediaWrap = document.createElement('div');
+                        mediaWrap.className =
+                            'relative aspect-video w-full bg-black/10';
+
+                        if (post.youtubeEmbedSrc) {
+                            const iframe = document.createElement('iframe');
+                            iframe.src = post.youtubeEmbedSrc;
+                            iframe.loading = 'lazy';
+                            iframe.className = 'w-full h-full';
+                            iframe.allow =
+                                'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
+                            iframe.referrerPolicy =
+                                'strict-origin-when-cross-origin';
+                            iframe.allowFullscreen = true;
+                            mediaWrap.appendChild(iframe);
+                        } else if (post.heroThumbSrc) {
+                            const img = document.createElement('img');
+                            img.src = post.heroThumbSrc;
+                            img.alt = `${post.title} thumbnail`;
+                            img.loading = 'lazy';
+                            img.decoding = 'async';
+                            img.className = 'w-full h-full object-cover';
+                            mediaWrap.appendChild(img);
+                        } else {
+                            const placeholder = document.createElement('div');
+                            placeholder.className =
+                                'w-full h-full flex items-center justify-center text-muted-foreground';
+                            placeholder.textContent = 'No media';
+                            mediaWrap.appendChild(placeholder);
+                        }
+
+                        const overlay = document.createElement('div');
+                        overlay.className =
+                            'absolute inset-0 pointer-events-none bg-gradient-to-t from-black/30 via-black/0 to-black/0';
+                        mediaWrap.appendChild(overlay);
+
+                        const body = document.createElement('div');
+                        body.className = 'p-4 flex flex-col gap-2';
+
+                        const titleSpanThumb = document.createElement('span');
+                        titleSpanThumb.className =
+                            'text-headings font-semibold';
+                        titleSpanThumb.textContent = post.title;
+
+                        const metaSpan = document.createElement('span');
+                        metaSpan.className = 'text-muted-foreground text-sm';
+                        metaSpan.textContent = `${post.dateText} · ${post.minutesRead}`;
+
+                        body.appendChild(titleSpanThumb);
+                        body.appendChild(metaSpan);
+
+                        gridCard.appendChild(mediaWrap);
+                        gridCard.appendChild(body);
+                        gridEl.appendChild(gridCard);
                     }
 
                     seeMoreBtn.remove();
