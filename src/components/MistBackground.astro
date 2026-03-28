@@ -283,10 +283,8 @@
         const sparkles = document.querySelectorAll(
             '.star-sparkle[data-sparkle]'
         ) as NodeListOf<HTMLElement>;
-        console.log('Found', sparkles.length, 'static sparkles');
 
         if (sparkles.length === 0) {
-            console.error('No static sparkles found!');
             return;
         }
 
@@ -305,7 +303,6 @@
                 const y = rand(10, 90);
                 sparkle.style.left = x + '%';
                 sparkle.style.top = y + '%';
-                console.log('Moved sparkle', index + 1, 'to', x + '%', y + '%');
 
                 // Wait a moment then restart animation
                 setTimeout(() => {
@@ -317,12 +314,6 @@
 
         // Start the system
         function startSparkleSystem() {
-            console.log(
-                'Starting',
-                sparkles.length,
-                'static sparkles that move to random positions...'
-            );
-
             // Set up position changes for each sparkle
             sparkles.forEach((sparkle, index) => {
                 // Move each sparkle at different intervals
@@ -341,12 +332,19 @@
         startSparkleSystem();
     }
 
-    // Wait for DOM to be ready
+    function scheduleSparklesWhenIdle() {
+        const run = () => initializeSparkles();
+        if ('requestIdleCallback' in window) {
+            requestIdleCallback(run, { timeout: 2000 });
+        } else {
+            setTimeout(run, 0);
+        }
+    }
+
     if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initializeSparkles);
+        document.addEventListener('DOMContentLoaded', scheduleSparklesWhenIdle);
     } else {
-        // DOM is already ready
-        initializeSparkles();
+        scheduleSparklesWhenIdle();
     }
 
     // --------------------------

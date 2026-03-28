@@ -5,10 +5,12 @@ const astroIconSrc =
 const { className = '' } = Astro.props;
 ---
 
-<img
-  src={astroIconSrc}
-  alt="Astro"
-  class={`inline-block ${className}`}
-  style="width: 1em; height: 1em;"
-/>
+<span class="not-prose inline align-middle">
+  <img
+    src={astroIconSrc}
+    alt="Astro"
+    class={`inline-block ${className}`}
+    style="width: 1em; height: 1em; margin: 0; vertical-align: -0.125em;"
+  />
+</span>
 

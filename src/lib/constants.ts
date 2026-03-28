@@ -24,7 +24,7 @@ type DefaultConfigurationType = {
 };
 
 export const DEFAULT_CONFIGURATION: DefaultConfigurationType = {
-  baseUrl: astroConfig.site || 'https://anupj.dev',
+  baseUrl: astroConfig.site || 'https://techtremolo.com',
   author: {
     avatar,
     name: 'Anup Jambhekar',
@@ -42,6 +42,6 @@ export const DEFAULT_CONFIGURATION: DefaultConfigurationType = {
     twitter: {
       creator: '@anupjambhekar',
     },
-    robots: 'noindex, nofollow',
+    robots: 'index, follow',
   },
 };

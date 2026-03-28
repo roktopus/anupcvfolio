@@ -1,6 +1,6 @@
 ---
 const pathname = Astro.url.pathname;
-import SwitchTheme from '@/components/SwitchTheme.tsx';
+import SwitchTheme from '@/components/SwitchTheme.astro';
 
 const isHomePage = pathname === '/';
 const isWritingPage = pathname.startsWith('/writing');
@@ -42,6 +42,6 @@ const isWritingPage = pathname.startsWith('/writing');
             </ul>
         </nav>
         </div>
-        <SwitchTheme className="shrink-0" client:only="react" />
+        <SwitchTheme className="shrink-0" />
     </div>
 </header>
