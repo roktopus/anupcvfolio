@@ -6,7 +6,14 @@ import type { AuthorInfo } from '@/lib/constants';
 interface Props extends AuthorInfo {}
 const { avatar, name, headline, username, location, pronouns } = Astro.props;
 
-const image = await getImage({ src: avatar, format: 'avif' });
+// Resize at build time: displayed 92×92 (≈161 CSS px on 1.75× DPR → 184px covers 2×).
+const image = await getImage({
+    src: avatar,
+    width: 184,
+    height: 184,
+    format: 'avif',
+    quality: 78,
+});
 ---
 
 <div class="flex items-center gap-4">

@@ -101,9 +101,9 @@ Use this workflow to add a post that renders correctly in both post pages and th
    - `src/content/posts/<your-slug>/media/...`
 4. Write content in Markdown/MDX:
    - Use headings (`##`, `###`) and short paragraphs.
-   - Use fenced blocks for chord sheets/tabs, e.g.:
+   - Use fenced blocks for chord sheets/tabs (use `plaintext` so Shiki can highlight; the post page still styles chord notation):
      ````md
-     ```chords
+     ```plaintext
      (Em) line one
      (C) line two
      ```

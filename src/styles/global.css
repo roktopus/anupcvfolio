@@ -1,5 +1,6 @@
 :root {
-  font-family: var(--font-inter), sans-serif;
+  font-family: var(--font-inter-variable), ui-sans-serif, system-ui, sans-serif;
+  font-optical-sizing: auto;
 }
 
 /* Prevent layout shift caused by scrollbar appearance/disappearance */
@@ -7,13 +8,6 @@ html {
   overflow-y: scroll;
   overflow-x: hidden;
   max-width: 100%;
-}
-
-@supports (font-variation-settings: normal) {
-  :root {
-    font-family: var(--font-inter-variable), sans-serif;
-    font-optical-sizing: auto;
-  }
 }
 
 @import 'tailwindcss';
@@ -62,14 +56,14 @@ html {
   --color-headings: var(--palette-800);
   --color-border: var(--palette-300);
 
-  --font-sans: var(--font-inter), 
-    ui-sans-serif, 
-    system-ui, 
-    sans-serif, 
-    'Apple Color Emoji', 
-    'Segoe UI Emoji', 
-    'Segoe UI Symbol', 
-    'Noto Color Emoji';
+  --font-sans: var(--font-inter-variable), ui-sans-serif, system-ui, sans-serif,
+    'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+}
+
+/* Below-the-fold sections: skip layout/paint until near viewport (less main-thread work before LCP). */
+.cv-defer-layout {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 900px;
 }
 
 /* ============================================================================

@@ -6,6 +6,10 @@ import BaseLayout from '@/layouts/BaseLayout.astro';
 import { DEFAULT_CONFIGURATION } from '@/lib/constants';
 import { formatDate } from '@/lib/utils';
 import { getImage } from 'astro:assets';
+
+/** Matches grid: 1 / 2 / 3 columns for responsive picks below. */
+const HERO_THUMB_SIZES =
+    '(max-width: 639px) 100vw, (max-width: 1023px) 50vw, 33vw';
 import WritingTopicsCard from '@/components/writing/WritingTopicsCard.astro';
 import { writingTopicsItems } from '@/data/writing-topics';
 
@@ -98,14 +102,28 @@ const postsWithMeta = await Promise.all(
         const { remarkPluginFrontmatter } = await render(post);
         const youtubeEmbedSrc = getPostYouTubeEmbedSrc(post.id);
 
-        const heroThumb = post.data.image
-            ? await getImage({
-                  src: post.data.image,
-                  format: 'webp',
-                  width: 800,
-                  height: 450,
-              })
-            : null;
+        let heroThumbSrc: string | null = null;
+        let heroThumbSrcSet: string | null = null;
+        if (post.data.image) {
+            const [w480, w960] = await Promise.all([
+                getImage({
+                    src: post.data.image,
+                    format: 'webp',
+                    width: 480,
+                    height: 270,
+                    quality: 78,
+                }),
+                getImage({
+                    src: post.data.image,
+                    format: 'webp',
+                    width: 960,
+                    height: 540,
+                    quality: 78,
+                }),
+            ]);
+            heroThumbSrc = w960.src;
+            heroThumbSrcSet = `${w480.src} 480w, ${w960.src} 960w`;
+        }
 
         return {
             id: post.id,
@@ -113,7 +131,9 @@ const postsWithMeta = await Promise.all(
             date: post.data.date,
             dateText: formatDate(post.data.date),
             minutesRead: remarkPluginFrontmatter.minutesRead,
-            heroThumbSrc: heroThumb?.src ?? null,
+            heroThumbSrc,
+            heroThumbSrcSet,
+            heroThumbSizes: HERO_THUMB_SIZES,
             youtubeEmbedSrc,
         };
     })
@@ -121,6 +141,11 @@ const postsWithMeta = await Promise.all(
 
 const initialPosts = postsWithMeta.slice(0, POSTS_INITIAL_COUNT);
 const remainingPosts = postsWithMeta.slice(POSTS_INITIAL_COUNT);
+
+/** First above-the-fold hero image (not iframe) — eager + high priority for LCP. */
+const lcpThumbIndex = initialPosts.findIndex(
+    (p) => p.heroThumbSrc && !p.youtubeEmbedSrc
+);
 ---
 
 <BaseLayout seo={entry.data.seo}>
@@ -204,7 +229,10 @@ const remainingPosts = postsWithMeta.slice(POSTS_INITIAL_COUNT);
                 id="latest-posts-grid"
                 class="grid grid-cols-1 gap-4 mt-4 sm:grid-cols-2 lg:grid-cols-3"
             >
-                {initialPosts.map((post) => (
+                {initialPosts.map((post, index) => {
+                    const isLcpThumb =
+                        lcpThumbIndex !== -1 && index === lcpThumbIndex;
+                    return (
                     <a
                         href={`/writing/${post.id}/`}
                         class="group block rounded-xl border border-border/60 bg-muted/20 hover:bg-muted/40 transition-colors overflow-hidden"
@@ -222,8 +250,11 @@ const remainingPosts = postsWithMeta.slice(POSTS_INITIAL_COUNT);
                             ) : post.heroThumbSrc ? (
                                 <img
                                     src={post.heroThumbSrc}
+                                    srcset={post.heroThumbSrcSet ?? undefined}
+                                    sizes={post.heroThumbSrcSet ? post.heroThumbSizes : undefined}
                                     alt={`${post.title} thumbnail`}
-                                    loading="lazy"
+                                    loading={isLcpThumb ? 'eager' : 'lazy'}
+                                    fetchpriority={isLcpThumb ? 'high' : undefined}
                                     decoding="async"
                                     class="w-full h-full object-cover"
                                 />
@@ -243,7 +274,8 @@ const remainingPosts = postsWithMeta.slice(POSTS_INITIAL_COUNT);
                             </span>
                         </div>
                     </a>
-                ))}
+                    );
+                })}
             </div>
 
             <script>
@@ -552,6 +584,12 @@ const remainingPosts = postsWithMeta.slice(POSTS_INITIAL_COUNT);
                         } else if (post.heroThumbSrc) {
                             const img = document.createElement('img');
                             img.src = post.heroThumbSrc;
+                            if (post.heroThumbSrcSet) {
+                                img.srcset = post.heroThumbSrcSet;
+                            }
+                            if (post.heroThumbSizes) {
+                                img.sizes = post.heroThumbSizes;
+                            }
                             img.alt = `${post.title} thumbnail`;
                             img.loading = 'lazy';
                             img.decoding = 'async';

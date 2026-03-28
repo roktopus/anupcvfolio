@@ -1,0 +1,79 @@
+---
+interface Props {
+    className?: string;
+}
+
+const { className = '' } = Astro.props;
+const base =
+    'theme-toggle p-2 rounded-full bg-white/80 dark:bg-black/80 border border-gray-200 dark:border-gray-800 text-headings hover:bg-white dark:hover:bg-black transition-colors cursor-pointer shadow-lg';
+---
+
+<button type="button" class:list={[base, className]} aria-label="Switch theme">
+    <span class="dark:hidden" aria-hidden="true">
+        <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            class="w-5 h-5"
+        >
+            <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path>
+        </svg>
+    </span>
+    <span class="hidden dark:block" aria-hidden="true">
+        <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            class="w-5 h-5"
+        >
+            <circle cx="12" cy="12" r="4"></circle>
+            <path d="M12 2v2"></path>
+            <path d="M12 20v2"></path>
+            <path d="m4.93 4.93 1.41 1.41"></path>
+            <path d="m17.66 17.66 1.41 1.41"></path>
+            <path d="M2 12h2"></path>
+            <path d="M20 12h2"></path>
+            <path d="m6.34 17.66-1.41 1.41"></path>
+            <path d="m19.07 4.93-1.41 1.41"></path>
+        </svg>
+    </span>
+</button>
+<script is:inline>
+    (function () {
+        var THEME_KEY = 'theme';
+        var buttons = document.querySelectorAll('.theme-toggle');
+        if (!buttons.length) return;
+
+        function applyAria() {
+            var dark = document.documentElement.classList.contains('dark');
+            var label = dark ? 'Switch to light theme' : 'Switch to dark theme';
+            buttons.forEach(function (btn) {
+                btn.setAttribute('aria-label', label);
+            });
+        }
+
+        applyAria();
+
+        buttons.forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                var dark = document.documentElement.classList.toggle('dark');
+                try {
+                    localStorage.setItem(THEME_KEY, dark ? 'dark' : 'light');
+                } catch (e) {}
+                applyAria();
+            });
+        });
+    })();
+</script>
