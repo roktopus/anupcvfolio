@@ -1,8 +1,14 @@
 ---
 import Container from '@/components/Container.astro';
+
+interface Props {
+    class?: string;
+}
+
+const { class: className } = Astro.props;
 ---
 
-<Container as="footer" class="pt-24">
+<Container as="footer" class:list={['pt-24', className]}>
     <p class="text-center text-muted-foreground text-sm">
         &copy; {new Date().getFullYear()}. Developed by Anup Jambhekar.
     </p>

@@ -152,16 +152,29 @@ const PATENT_ICON_SVG = `
 `;
 ---
 
-<div class="flex flex-col gap-6">
-    <h2 class="text-headings text-lg font-semibold magic-text">
+<section
+    class="experience-chronicles not-prose flex flex-col gap-6"
+    aria-labelledby="experience-chronicles-title"
+>
+    <h2
+        id="experience-chronicles-title"
+        class="text-headings text-lg font-semibold magic-text"
+    >
         📜 Chronicles of Battle & Craft Across Digital Kingdoms
     </h2>
 
-    <div class="grid grid-cols-1 gap-4">
+    <div class="flex flex-col gap-4">
         <!-- Companies Section -->
-        <div class="flex items-start justify-between gap-3">
-            <span class="text-sm text-muted-foreground shrink-0">Companies</span>
-            <div class="flex flex-wrap justify-end gap-2 max-w-[70%] sm:max-w-none">
+        <div
+            class="experience-chronicles__row flex flex-col gap-3 rounded-xl border border-border/60 bg-muted/15 px-3 py-3 shadow-sm sm:flex-row sm:items-start sm:justify-between sm:gap-4 sm:px-4 sm:py-3.5"
+        >
+            <span
+                class="text-sm font-medium text-headings sm:mt-0.5 sm:max-w-[11rem] sm:shrink-0"
+                >Companies</span
+            >
+            <div
+                class="experience-chronicles__icons flex min-w-0 flex-1 flex-wrap gap-3 sm:justify-end"
+            >
                 {
                     companies.map(async (company) => {
                         const logoImage = await getCompanyLogo(
@@ -199,9 +212,16 @@ const PATENT_ICON_SVG = `
         </div>
 
         <!-- Certifications Section -->
-        <div class="flex items-start justify-between gap-3">
-            <span class="text-sm text-muted-foreground shrink-0">Certifications</span>
-            <div class="flex flex-wrap justify-end gap-2 max-w-[70%] sm:max-w-none">
+        <div
+            class="experience-chronicles__row flex flex-col gap-3 rounded-xl border border-border/60 bg-muted/15 px-3 py-3 shadow-sm sm:flex-row sm:items-start sm:justify-between sm:gap-4 sm:px-4 sm:py-3.5"
+        >
+            <span
+                class="text-sm font-medium text-headings sm:mt-0.5 sm:max-w-[11rem] sm:shrink-0"
+                >Certifications</span
+            >
+            <div
+                class="experience-chronicles__icons flex min-w-0 flex-1 flex-wrap gap-3 sm:justify-end"
+            >
                 {
                     certifications.map(async (certification) => {
                         const iconImage = await getCertificationIcon(
@@ -235,9 +255,16 @@ const PATENT_ICON_SVG = `
         </div>
 
         <!-- Patents Section -->
-        <div class="flex items-start justify-between gap-3">
-            <span class="text-sm text-muted-foreground shrink-0">Patents</span>
-            <div class="flex flex-wrap justify-end gap-2 max-w-[70%] sm:max-w-none">
+        <div
+            class="experience-chronicles__row flex flex-col gap-3 rounded-xl border border-border/60 bg-muted/15 px-3 py-3 shadow-sm sm:flex-row sm:items-start sm:justify-between sm:gap-4 sm:px-4 sm:py-3.5"
+        >
+            <span
+                class="text-sm font-medium text-headings sm:mt-0.5 sm:max-w-[11rem] sm:shrink-0"
+                >Patents</span
+            >
+            <div
+                class="experience-chronicles__icons flex min-w-0 flex-1 flex-wrap gap-3 sm:justify-end"
+            >
                 <a
                     href="https://image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/20240019995"
                     target="_blank"
@@ -254,9 +281,16 @@ const PATENT_ICON_SVG = `
         </div>
 
         <!-- Cloud Platforms Section -->
-        <div class="flex items-start justify-between gap-3">
-            <span class="text-sm text-muted-foreground shrink-0">Cloud Platforms</span>
-            <div class="flex flex-wrap justify-end gap-2 max-w-[70%] sm:max-w-none">
+        <div
+            class="experience-chronicles__row flex flex-col gap-3 rounded-xl border border-border/60 bg-muted/15 px-3 py-3 shadow-sm sm:flex-row sm:items-start sm:justify-between sm:gap-4 sm:px-4 sm:py-3.5"
+        >
+            <span
+                class="text-sm font-medium text-headings sm:mt-0.5 sm:max-w-[11rem] sm:shrink-0"
+                >Cloud Platforms</span
+            >
+            <div
+                class="experience-chronicles__icons flex min-w-0 flex-1 flex-wrap gap-3 sm:justify-end"
+            >
                 {
                     cloudPlatforms.map((platform) => (
                         <a
@@ -278,11 +312,16 @@ const PATENT_ICON_SVG = `
         </div>
 
         <!-- Programming Languages Section -->
-        <div class="flex items-start justify-between gap-3">
-            <span class="text-sm text-muted-foreground"
+        <div
+            class="experience-chronicles__row flex flex-col gap-3 rounded-xl border border-border/60 bg-muted/15 px-3 py-3 shadow-sm sm:flex-row sm:items-start sm:justify-between sm:gap-4 sm:px-4 sm:py-3.5"
+        >
+            <span
+                class="text-sm font-medium text-headings sm:mt-0.5 sm:max-w-[11rem] sm:shrink-0"
                 >Programming Languages</span
             >
-            <div class="flex flex-wrap justify-end gap-2 max-w-[70%] sm:max-w-none">
+            <div
+                class="experience-chronicles__icons flex min-w-0 flex-1 flex-wrap gap-3 sm:justify-end"
+            >
                 {
                     programmingLanguages.map((language) => (
                         <a
@@ -304,11 +343,16 @@ const PATENT_ICON_SVG = `
         </div>
 
         <!-- Frameworks & Libraries Section -->
-        <div class="flex items-start justify-between gap-3">
-            <span class="text-sm text-muted-foreground"
+        <div
+            class="experience-chronicles__row flex flex-col gap-3 rounded-xl border border-border/60 bg-muted/15 px-3 py-3 shadow-sm sm:flex-row sm:items-start sm:justify-between sm:gap-4 sm:px-4 sm:py-3.5"
+        >
+            <span
+                class="text-sm font-medium text-headings sm:mt-0.5 sm:max-w-[11rem] sm:shrink-0"
                 >Frameworks & Libraries</span
             >
-            <div class="flex flex-wrap justify-end gap-2 max-w-[70%] sm:max-w-none">
+            <div
+                class="experience-chronicles__icons flex min-w-0 flex-1 flex-wrap gap-3 sm:justify-end"
+            >
                 {
                     frameworks.map((framework) => (
                         <a
@@ -330,9 +374,16 @@ const PATENT_ICON_SVG = `
         </div>
 
         <!-- Databases Section -->
-        <div class="flex items-start justify-between gap-3">
-            <span class="text-sm text-muted-foreground shrink-0">Databases</span>
-            <div class="flex flex-wrap justify-end gap-2 max-w-[70%] sm:max-w-none">
+        <div
+            class="experience-chronicles__row flex flex-col gap-3 rounded-xl border border-border/60 bg-muted/15 px-3 py-3 shadow-sm sm:flex-row sm:items-start sm:justify-between sm:gap-4 sm:px-4 sm:py-3.5"
+        >
+            <span
+                class="text-sm font-medium text-headings sm:mt-0.5 sm:max-w-[11rem] sm:shrink-0"
+                >Databases</span
+            >
+            <div
+                class="experience-chronicles__icons flex min-w-0 flex-1 flex-wrap gap-3 sm:justify-end"
+            >
                 {
                     databases.map((database) => (
                         <a
@@ -354,11 +405,16 @@ const PATENT_ICON_SVG = `
         </div>
 
         <!-- Deployment & Version Control Section -->
-        <div class="flex items-start justify-between gap-3">
-            <span class="text-sm text-muted-foreground"
+        <div
+            class="experience-chronicles__row flex flex-col gap-3 rounded-xl border border-border/60 bg-muted/15 px-3 py-3 shadow-sm sm:flex-row sm:items-start sm:justify-between sm:gap-4 sm:px-4 sm:py-3.5"
+        >
+            <span
+                class="text-sm font-medium text-headings sm:mt-0.5 sm:max-w-[11rem] sm:shrink-0"
                 >Deployment & Version Control</span
             >
-            <div class="flex flex-wrap justify-end gap-2 max-w-[70%] sm:max-w-none">
+            <div
+                class="experience-chronicles__icons flex min-w-0 flex-1 flex-wrap gap-3 sm:justify-end"
+            >
                 {
                     deploymentTools.map((tool) => (
                         <a
@@ -379,4 +435,4 @@ const PATENT_ICON_SVG = `
             </div>
         </div>
     </div>
-</div>
+</section>
