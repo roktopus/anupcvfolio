@@ -5,6 +5,8 @@
 /* Prevent layout shift caused by scrollbar appearance/disappearance */
 html {
   overflow-y: scroll;
+  overflow-x: hidden;
+  max-width: 100%;
 }
 
 @supports (font-variation-settings: normal) {
@@ -79,6 +81,8 @@ html {
 body {
   min-height: 100vh;
   position: relative;
+  overflow-x: hidden;
+  max-width: 100%;
 }
 
 /* Magical text effects - Golden for light, Purple-Red for dark */

@@ -1,0 +1,44 @@
+---
+interface Props {
+    title?: string;
+    intro?: string;
+    items: readonly string[];
+}
+
+const {
+    title = 'What You Will Find',
+    intro = 'Topics I write about:',
+    items,
+} = Astro.props;
+---
+
+<section class="writing-topics-card not-prose" aria-labelledby="writing-topics-title">
+    <article
+        class="group relative overflow-hidden rounded-xl border border-border/60 bg-muted/20 px-5 py-5 shadow-sm transition-colors hover:bg-muted/35"
+    >
+        <div
+            class="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-yellow-500/70 to-orange-500/70 opacity-90 dark:from-purple-600/80 dark:to-red-600/80"
+            aria-hidden="true"
+        />
+        <h2
+            id="writing-topics-title"
+            class="text-headings border-b border-border/50 pb-3 text-base font-semibold tracking-tight"
+        >
+            {title}
+        </h2>
+        <p class="mt-3 text-sm text-muted-foreground">{intro}</p>
+        <ul class="mt-3 flex flex-col gap-2.5 text-sm leading-relaxed text-foreground">
+            {
+                items.map((item) => (
+                    <li class="flex gap-3">
+                        <span
+                            class="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-gradient-to-br from-yellow-500 to-orange-500 dark:from-purple-500 dark:to-red-500"
+                            aria-hidden="true"
+                        />
+                        <span class="text-pretty">{item}</span>
+                    </li>
+                ))
+            }
+        </ul>
+    </article>
+</section>

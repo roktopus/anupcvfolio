@@ -6,21 +6,34 @@ import BaseLayout from '@/layouts/BaseLayout.astro';
 import { DEFAULT_CONFIGURATION } from '@/lib/constants';
 import { formatDate } from '@/lib/utils';
 import { getImage } from 'astro:assets';
-import fs from 'node:fs/promises';
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import WritingTopicsCard from '@/components/writing/WritingTopicsCard.astro';
+import { writingTopicsItems } from '@/data/writing-topics';
 
 const entry = (await getEntry('pages', 'writing'))!;
-const { Content } = await render(entry);
 const posts = (await getCollection('posts')).sort(
     (a, b) => b.data.date.getTime() - a.data.date.getTime()
 );
 
 const POSTS_INITIAL_COUNT = 6;
 
-const postsDir = path.join(
-    fileURLToPath(new URL('../../content/posts', import.meta.url))
-);
+/** MDX source inlined at build time (no runtime fs — safe for static + CI). */
+const postMdxSources = import.meta.glob('../../content/posts/**/index.mdx', {
+    eager: true,
+    query: '?raw',
+    import: 'default',
+}) as Record<string, string>;
+
+function postIdFromMdxGlobKey(key: string): string | null {
+    const normalized = key.replace(/\\/g, '/');
+    const m = normalized.match(/content\/posts\/(.+)\/index\.mdx$/);
+    return m?.[1] ?? null;
+}
+
+const mdxByPostId: Record<string, string> = {};
+for (const [key, source] of Object.entries(postMdxSources)) {
+    const id = postIdFromMdxGlobKey(key);
+    if (id) mdxByPostId[id] = source;
+}
 
 function extractFirstYouTubeUrlFromMdx(mdx: string): string | null {
     const match = mdx.match(
@@ -69,25 +82,21 @@ function extractYouTubeId(rawUrl: string): string | null {
     return null;
 }
 
-async function getPostYouTubeEmbedSrc(postId: string) {
-    const filePath = path.join(postsDir, postId, 'index.mdx');
+function getPostYouTubeEmbedSrc(postId: string): string | null {
+    const mdx = mdxByPostId[postId];
+    if (!mdx) return null;
 
-    try {
-        const mdx = await fs.readFile(filePath, 'utf-8');
-        const youtubeUrl = extractFirstYouTubeUrlFromMdx(mdx);
-        const youtubeId = youtubeUrl ? extractYouTubeId(youtubeUrl) : null;
-        return youtubeId
-            ? `https://www.youtube.com/embed/${youtubeId}?rel=0&modestbranding=1`
-            : null;
-    } catch {
-        return null;
-    }
+    const youtubeUrl = extractFirstYouTubeUrlFromMdx(mdx);
+    const youtubeId = youtubeUrl ? extractYouTubeId(youtubeUrl) : null;
+    return youtubeId
+        ? `https://www.youtube.com/embed/${youtubeId}?rel=0&modestbranding=1`
+        : null;
 }
 
 const postsWithMeta = await Promise.all(
     posts.map(async (post) => {
         const { remarkPluginFrontmatter } = await render(post);
-        const youtubeEmbedSrc = await getPostYouTubeEmbedSrc(post.id);
+        const youtubeEmbedSrc = getPostYouTubeEmbedSrc(post.id);
 
         const heroThumb = post.data.image
             ? await getImage({
@@ -120,11 +129,7 @@ const remainingPosts = postsWithMeta.slice(POSTS_INITIAL_COUNT);
     </Container>
 
     <Container as="section" class="py-6">
-        <div class="flex flex-col gap-6">
-            <div class="prose dark:prose-invert">
-                <Content />
-            </div>
-        </div>
+        <WritingTopicsCard items={writingTopicsItems} />
     </Container>
 
     <Container as="section" class="py-6">

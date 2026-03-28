@@ -1,0 +1,54 @@
+---
+import type { HomeProfileCard } from '@/data/homepage-profile';
+
+interface Props {
+    sections: HomeProfileCard[];
+}
+
+const { sections } = Astro.props;
+---
+
+<section
+    class="home-profile-cards not-prose mt-10 flex flex-col gap-4"
+    aria-label="Role, expertise, and strengths"
+>
+    <div class="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-5">
+        {
+            sections.map((section) => (
+                <article
+                    class:list={[
+                        'home-profile-card group relative overflow-hidden rounded-xl border border-border/60 bg-muted/20 px-5 py-5 shadow-sm transition-colors hover:bg-muted/35',
+                        section.wide && 'lg:col-span-2',
+                    ]}
+                >
+                    <div
+                        class="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-yellow-500/70 to-orange-500/70 opacity-90 dark:from-purple-600/80 dark:to-red-600/80"
+                        aria-hidden="true"
+                    />
+                    <h3 class="text-headings border-b border-border/50 pb-3 text-base font-semibold tracking-tight">
+                        {section.title}
+                    </h3>
+                    <ul
+                        class:list={[
+                            'home-profile-card__list mt-4 text-sm leading-relaxed text-foreground gap-2.5',
+                            section.wide && section.items.length > 4
+                                ? 'grid grid-cols-1 lg:grid-cols-2 lg:gap-x-10 lg:gap-y-2.5'
+                                : 'flex flex-col',
+                        ]}
+                    >
+                        {section.items.map((item) => (
+                            <li class="home-profile-card__item flex gap-3">
+                                <span
+                                    class="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-gradient-to-br from-yellow-500 to-orange-500 dark:from-purple-500 dark:to-red-500"
+                                    aria-hidden="true"
+                                />
+                                <span class="text-pretty">{item}</span>
+                            </li>
+                        ))}
+                    </ul>
+                </article>
+            ))
+        }
+    </div>
+</section>
+
