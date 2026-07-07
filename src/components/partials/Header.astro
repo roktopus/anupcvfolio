@@ -2,46 +2,107 @@
 const pathname = Astro.url.pathname;
 import SwitchTheme from '@/components/SwitchTheme.astro';
 
-const isHomePage = pathname === '/';
+const isAboutPage = pathname === '/' || pathname === '/about';
 const isWritingPage = pathname.startsWith('/writing');
+
+const navItems = [
+    {
+        label: 'About',
+        href: '/about',
+        active: isAboutPage,
+        icon: 'root',
+    },
+    {
+        label: 'Scrolls',
+        href: '/writing',
+        active: isWritingPage,
+        icon: 'scroll',
+    },
+];
 ---
 
-<header
-    class="w-full flex justify-center items-center fixed top-0 left-0 right-0 z-50"
->
-    <div class="mt-5 flex items-center gap-2">
-        <div
-            class="w-max bg-white/80 dark:bg-black/80 backdrop-blur-md border border-gray-200 dark:border-gray-800 rounded-full p-1 shadow-lg"
-        >
-        <nav class="flex items-center">
-            <ul class="flex items-center gap-1">
-                <li>
-                    <a
-                        href="/"
-                        data-astro-prefetch="hover"
-                        class:list={[
-                            'font-medium transition-colors block px-5 py-2 rounded-full',
-                            'text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white',
-                            isHomePage &&
-                                'text-white dark:text-black bg-gradient-to-r from-yellow-500 to-orange-500 dark:from-purple-600 dark:to-red-600 shadow-md',
-                        ]}>🏰 Root</a
-                    >
-                </li>
-                <li>
-                    <a
-                        href="/writing"
-                        data-astro-prefetch="hover"
-                        class:list={[
-                            'font-medium transition-colors block px-5 py-2 rounded-full',
-                            'text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white',
-                            isWritingPage &&
-                                'text-white dark:text-black bg-gradient-to-r from-yellow-500 to-orange-500 dark:from-purple-600 dark:to-red-600 shadow-md',
-                        ]}>📜Scrolls</a
-                    >
-                </li>
+<header class="cv-site-header w-full flex justify-center items-center fixed top-0 left-0 right-0 z-50">
+    <div class="cv-nav-row mt-4 sm:mt-5 flex items-center gap-2 px-3">
+        <nav aria-label="Primary" class="cv-nav-pill cv-glass rounded-full p-1 shadow-lg">
+            <ul class="flex items-center gap-0.5">
+                {
+                    navItems.map((item) => (
+                        <li>
+                            <a
+                                href={item.href}
+                                data-astro-prefetch="hover"
+                                aria-current={item.active ? 'page' : undefined}
+                                class:list={[
+                                    'cv-nav-link group inline-flex items-center gap-1.5 rounded-full px-3.5 py-2 text-sm font-medium transition-colors',
+                                    item.active
+                                        ? 'cv-nav-active'
+                                        : 'cv-nav-idle',
+                                ]}
+                            >
+                                <span class="cv-nav-icon" aria-hidden="true">
+                                    {item.icon === 'root' && (
+                                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M3 21h18" />
+                                            <path d="M5 21V7l7-4 7 4v14" />
+                                            <path d="M9 21v-6h6v6" />
+                                        </svg>
+                                    )}
+                                    {item.icon === 'scroll' && (
+                                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M8 3H18a2 2 0 0 1 2 2v12a3 3 0 0 1-3 3H6" />
+                                            <path d="M6 3a2 2 0 0 0-2 2v12a3 3 0 0 0 3 3" />
+                                            <path d="M10 8h6" />
+                                            <path d="M10 12h6" />
+                                        </svg>
+                                    )}
+                                </span>
+                                <span>{item.label}</span>
+                            </a>
+                        </li>
+                    ))
+                }
             </ul>
         </nav>
-        </div>
         <SwitchTheme className="shrink-0" />
     </div>
 </header>
+
+<style>
+    .cv-nav-idle {
+        color: var(--palette-600);
+    }
+    .cv-nav-idle:hover {
+        color: var(--palette-800);
+        background: var(--accent-soft);
+    }
+    .dark .cv-nav-idle {
+        color: var(--palette-600);
+    }
+    .dark .cv-nav-idle:hover {
+        color: var(--palette-800);
+    }
+    .cv-nav-active {
+        background: var(--accent);
+        color: var(--accent-contrast);
+        box-shadow: 0 6px 16px var(--ring);
+    }
+    .cv-nav-active:hover {
+        background: var(--accent-strong);
+        color: var(--accent-contrast);
+    }
+    .cv-nav-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+    /* Keep the pill compact on small screens */
+    @media (max-width: 480px) {
+        .cv-nav-row {
+            gap: 0.4rem;
+        }
+        .cv-nav-link {
+            padding: 0.4rem 0.7rem;
+            font-size: 0.82rem;
+        }
+    }
+</style>

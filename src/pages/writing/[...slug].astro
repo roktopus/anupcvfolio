@@ -3,6 +3,9 @@ import Container from '@/components/Container.astro';
 import Avatar from '@/components/ui/Avatar.astro';
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import { DEFAULT_CONFIGURATION } from '@/lib/constants';
+import { formatDate } from '@/lib/utils';
+import { deriveCategory } from '@/lib/post-meta';
+import PortfolioIcon from '@/components/ui/PortfolioIcon.astro';
 import { Image, getImage } from 'astro:assets';
 import { getCollection, render } from 'astro:content';
 
@@ -16,7 +19,7 @@ export async function getStaticPaths() {
 }
 
 const { entry } = Astro.props;
-const { Content } = await render(entry);
+const { Content, remarkPluginFrontmatter } = await render(entry);
 const heroImage = entry.data.image
   ? await getImage({
       src: entry.data.image,
@@ -25,6 +28,11 @@ const heroImage = entry.data.image
       height: 675,
     })
   : null;
+
+const category = deriveCategory(entry.id, entry.data.title);
+const dateText = formatDate(entry.data.date);
+const minutesRead = remarkPluginFrontmatter.minutesRead as string | undefined;
+const description = entry.data.seo?.description ?? '';
 ---
 
 <BaseLayout seo={entry.data.seo}>
@@ -38,20 +46,60 @@ const heroImage = entry.data.image
       />
     </Fragment>
   )}
-  <Container as='section'>
-    <article class="flex flex-col gap-6">
-      <div class="flex flex-col gap-2">
-        <a href="/writing" class="transition-all text-muted-foreground hover:text-foreground pb-4 text-sm w-max">
-          Back to writing
-        </a>
-        <div class="flex flex-col gap-1.5">
-          <Avatar />
-          <span class="text-foreground">{DEFAULT_CONFIGURATION.author.name}</span>
+
+  <Container as="section" wide class="pt-6 sm:pt-10">
+    <article class="cv-article flex flex-col gap-6">
+      <!-- Back link -->
+      <a href="/writing" class="cv-back-link" data-astro-prefetch="hover">
+        <PortfolioIcon name="arrow-right" size={15} />
+        <span>Back to Scrolls</span>
+      </a>
+
+      <!-- Article header -->
+      <header class="cv-article-head flex flex-col gap-4">
+        <div class="flex items-center gap-3 flex-wrap">
+          <span class="cv-cat-tag">{category.toUpperCase()}</span>
+          <span class="cv-article-meta-inline text-sm text-muted-foreground flex items-center gap-2 flex-wrap">
+            <span class="flex items-center gap-1.5">
+              <PortfolioIcon name="bookmark" size={14} />
+              {dateText}
+            </span>
+            {minutesRead && (
+              <>
+                <span aria-hidden="true">·</span>
+                <span>{minutesRead}</span>
+              </>
+            )}
+          </span>
         </div>
-        <h1 class="text-3xl font-semibold text-headings">{entry.data.title}</h1>
-      </div>
+
+        <h1 class="cv-article-title text-3xl sm:text-4xl font-bold tracking-tight text-headings">
+          {entry.data.title}
+        </h1>
+
+        {description && (
+          <p class="cv-article-lead text-base sm:text-lg text-foreground max-w-2xl">
+            {description}
+          </p>
+        )}
+
+        <div class="cv-author-row flex items-center gap-3 pt-1">
+          <Avatar />
+          <div class="flex flex-col">
+            <span class="cv-author-name flex items-center gap-1.5">
+              {DEFAULT_CONFIGURATION.author.name}
+              <span class="cv-accent-text"><PortfolioIcon name="spark" size={13} /></span>
+            </span>
+            <span class="cv-author-sub text-sm text-muted-foreground">
+              3D Web XR Mixed Reality Engineer from Pune 🇮🇳 • He/Him
+            </span>
+          </div>
+        </div>
+      </header>
+
+      <!-- Hero image -->
       {entry.data.image && (
-        <div class="relative aspect-video overflow-hidden rounded-lg">
+        <div class="cv-article-hero relative aspect-video overflow-hidden">
           <Image
             src={entry.data.image}
             alt={entry.data.title}
@@ -66,11 +114,29 @@ const heroImage = entry.data.image
           />
         </div>
       )}
-      <div class="prose dark:prose-invert max-w-none">
+
+      <!-- Prose body -->
+      <div class="prose dark:prose-invert cv-prose max-w-none">
         <Content />
       </div>
+
+      <!-- Footer rule + back to scrolls -->
+      <footer class="cv-article-footer flex flex-col gap-4 pt-4">
+        <hr class="cv-article-rule" />
+        <div class="flex items-center justify-between gap-4 flex-wrap">
+          <a href="/writing" class="cv-back-link" data-astro-prefetch="hover">
+            <PortfolioIcon name="arrow-right" size={15} />
+            <span>Back to Scrolls</span>
+          </a>
+          <a href="/rss.xml" class="cv-rss-mini" aria-label="Subscribe via RSS">
+            <PortfolioIcon name="rss" size={15} />
+            <span>Subscribe via RSS</span>
+          </a>
+        </div>
+      </footer>
     </article>
   </Container>
+
   <style is:global>
     .prose pre.chord-sheet {
       margin: 1.25rem 0;
@@ -129,6 +195,117 @@ const heroImage = entry.data.image
       display: block;
     }
   </style>
+
+  <style>
+    .cv-article {
+      max-width: 46rem;
+      margin-inline: auto;
+    }
+    .cv-back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      color: var(--palette-600);
+      font-size: 0.88rem;
+      font-weight: 600;
+      width: max-content;
+      transition: color 0.2s ease;
+    }
+    .cv-back-link :global(svg) {
+      transform: rotate(180deg);
+      transition: transform 0.2s ease;
+    }
+    .cv-back-link:hover {
+      color: var(--accent-strong);
+    }
+    .cv-back-link:hover :global(svg) {
+      transform: rotate(180deg) translateX(3px);
+    }
+    .cv-cat-tag {
+      display: inline-block;
+      padding: 0.25rem 0.55rem;
+      border-radius: 6px;
+      background: var(--accent-soft);
+      color: var(--accent-strong);
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+    }
+    .dark .cv-cat-tag {
+      color: var(--accent);
+    }
+    .cv-article-title {
+      line-height: 1.15;
+    }
+    .cv-article-lead {
+      color: var(--palette-600);
+      line-height: 1.6;
+    }
+    .cv-author-name {
+      font-weight: 700;
+      color: var(--palette-800);
+    }
+    .cv-author-sub {
+      color: var(--palette-600);
+    }
+    .cv-article-hero {
+      border-radius: 16px;
+      box-shadow: var(--shadow-card);
+      border: 1px solid var(--border-soft);
+    }
+    .cv-prose {
+      color: var(--palette-600);
+    }
+    .cv-prose :global(a) {
+      color: var(--accent-strong);
+      text-decoration: underline;
+      text-underline-offset: 2px;
+    }
+    .dark .cv-prose :global(a) {
+      color: var(--accent);
+    }
+    .cv-prose :global(a:hover) {
+      color: var(--accent);
+    }
+    .cv-prose :global(h2) {
+      color: var(--palette-800);
+      margin-top: 2rem;
+    }
+    .cv-prose :global(h3) {
+      color: var(--palette-800);
+      margin-top: 1.5rem;
+    }
+    .cv-prose :global(strong) {
+      color: var(--palette-800);
+    }
+    .cv-prose :global(blockquote) {
+      border-left: 3px solid var(--accent);
+      color: var(--palette-600);
+    }
+    .cv-article-rule {
+      border: 0;
+      border-top: 1px solid var(--border-soft);
+      margin: 0;
+    }
+    .cv-rss-mini {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      color: var(--accent);
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+    .cv-rss-mini:hover {
+      color: var(--accent-strong);
+    }
+
+    @media (max-width: 640px) {
+      .cv-article-title {
+        font-size: 1.85rem;
+      }
+    }
+  </style>
+
   <script>
     // @ts-nocheck
     function extractYouTubeId(rawUrl) {
@@ -251,4 +428,3 @@ const heroImage = entry.data.image
     document.addEventListener('astro:after-swap', hydrateChordSheets);
   </script>
 </BaseLayout>
-  

@@ -1,0 +1,137 @@
+---
+interface Props {
+    name: string;
+    size?: number;
+}
+const { name, size = 22 } = Astro.props;
+const s = size;
+---
+
+<svg
+    width={s}
+    height={s}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="1.8"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    aria-hidden="true"
+>
+    {name === 'spatial' && (
+        <>
+            <path d="M12 2 3 7v10l9 5 9-5V7z" />
+            <path d="M3 7l9 5 9-5" />
+            <path d="M12 22V12" />
+        </>
+    )}
+    {name === 'saas' && (
+        <>
+            <rect x="3" y="4" width="18" height="14" rx="2" />
+            <path d="M3 8h18" />
+            <path d="M8 21h8" />
+            <path d="M12 18v3" />
+            <path d="m9 13 2 2 4-4" />
+        </>
+    )}
+    {name === 'legacy' && (
+        <>
+            <path d="M16 18 22 12 16 6" />
+            <path d="M8 6 2 12 8 18" />
+        </>
+    )}
+    {name === 'devops' && (
+        <path d="M13 2 4 14h7l-1 8 9-12h-7z" />
+    )}
+    {name === 'people' && (
+        <>
+            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+            <circle cx="9" cy="7" r="4" />
+            <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+            <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+        </>
+    )}
+    {name === 'rocket' && (
+        <>
+            <path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z" />
+            <path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z" />
+            <path d="M9 12H4s.55-3.58 2-5c1.62-1.55 5-2 5-2" />
+            <path d="M12 15v5s3.58-.55 5-2c1.55-1.62 2-5 2-5" />
+        </>
+    )}
+    {name === 'device' && (
+        <>
+            <rect x="2" y="4" width="14" height="12" rx="2" />
+            <path d="M10 16v4" />
+            <path d="M6 20h6" />
+            <rect x="17" y="9" width="5" height="11" rx="1.5" />
+        </>
+    )}
+    {name === 'growth' && (
+        <>
+            <path d="M3 3v18h18" />
+            <path d="M7 14l3-3 3 3 5-6" />
+            <path d="M18 8h3v3" />
+        </>
+    )}
+    {name === 'product' && (
+        <>
+            <path d="M16 18 22 12 16 6" />
+            <path d="M8 6 2 12 8 18" />
+            <circle cx="12" cy="12" r="2.5" />
+        </>
+    )}
+    {name === 'cloud' && (
+        <>
+            <path d="M17.5 19a4.5 4.5 0 0 0 .5-9 6 6 0 0 0-11.7-2A4 4 0 0 0 6 19z" />
+            <path d="M12 12v6" />
+            <path d="m9 15 3-3 3 3" />
+        </>
+    )}
+    {name === 'platform' && (
+        <>
+            <rect x="3" y="3" width="18" height="18" rx="2" />
+            <path d="M3 9h18" />
+            <path d="M9 21V9" />
+        </>
+    )}
+    {name === 'arrow-right' && (
+        <>
+            <path d="M5 12h14" />
+            <path d="m12 5 7 7-7 7" />
+        </>
+    )}
+    {name === 'scroll' && (
+        <>
+            <path d="M8 3H18a2 2 0 0 1 2 2v12a3 3 0 0 1-3 3H6" />
+            <path d="M6 3a2 2 0 0 0-2 2v12a3 3 0 0 0 3 3" />
+            <path d="M10 8h6" />
+            <path d="M10 12h6" />
+        </>
+    )}
+    {name === 'play' && (
+        <>
+            <circle cx="12" cy="12" r="10" />
+            <path d="M10 8.5 16 12l-6 3.5z" fill="currentColor" stroke="none" />
+        </>
+    )}
+    {name === 'search' && (
+        <>
+            <circle cx="11" cy="11" r="7" />
+            <path d="m21 21-4.3-4.3" />
+        </>
+    )}
+    {name === 'bookmark' && (
+        <path d="M19 21l-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
+    )}
+    {name === 'rss' && (
+        <>
+            <path d="M4 11a9 9 0 0 1 9 9" />
+            <path d="M4 4a16 16 0 0 1 16 16" />
+            <circle cx="5" cy="19" r="1.5" fill="currentColor" stroke="none" />
+        </>
+    )}
+    {name === 'spark' && (
+        <path d="M12 2c.6 5.3 4.7 9.4 10 10-5.3.6-9.4 4.7-10 10-.6-5.3-4.7-9.4-10-10 5.3-.6 9.4-4.7 10-10z" />
+    )}
+</svg>

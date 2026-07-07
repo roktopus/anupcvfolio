@@ -6,11 +6,20 @@ type LayoutTag = 'section' | 'div' | 'article' | 'header' | 'footer' | 'code';
 type Props<Tag extends LayoutTag> = Polymorphic<{
     as: Tag;
     class?: string;
+    /** Use the wider content measure for rich portfolio layouts. */
+    wide?: boolean;
 }>;
 
-const { as: Tag = 'div', class: className } = Astro.props as Props<LayoutTag>;
+const { as: Tag = 'div', class: className, wide = false } = Astro.props as Props<
+    LayoutTag
+>;
 ---
 
-<Tag class:list={['max-w-[40rem] mx-auto px-4', className]}>
+<Tag
+    class:list={[
+        wide ? 'max-w-[68rem] mx-auto px-4 sm:px-6' : 'max-w-[40rem] mx-auto px-4',
+        className,
+    ]}
+>
     <slot />
 </Tag>

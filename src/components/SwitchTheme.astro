@@ -4,40 +4,15 @@ interface Props {
 }
 
 const { className = '' } = Astro.props;
-const base =
-    'theme-toggle p-2 rounded-full bg-white/80 dark:bg-black/80 border border-gray-200 dark:border-gray-800 text-headings hover:bg-white dark:hover:bg-black transition-colors cursor-pointer shadow-lg';
 ---
 
-<button type="button" class:list={[base, className]} aria-label="Switch theme">
-    <span class="dark:hidden" aria-hidden="true">
-        <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            class="w-5 h-5"
-        >
-            <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path>
-        </svg>
-    </span>
-    <span class="hidden dark:block" aria-hidden="true">
-        <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            class="w-5 h-5"
-        >
+<button
+    type="button"
+    class:list={['theme-toggle cv-glass cv-theme-toggle', className]}
+    aria-label="Switch theme"
+>
+    <span class="theme-icon theme-icon-sun" aria-hidden="true">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="12" cy="12" r="4"></circle>
             <path d="M12 2v2"></path>
             <path d="M12 20v2"></path>
@@ -49,7 +24,55 @@ const base =
             <path d="m19.07 4.93-1.41 1.41"></path>
         </svg>
     </span>
+    <span class="theme-icon theme-icon-moon" aria-hidden="true">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path>
+        </svg>
+    </span>
 </button>
+
+<style>
+    .cv-theme-toggle {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 38px;
+        height: 38px;
+        border-radius: 999px;
+        cursor: pointer;
+        color: var(--palette-700);
+        box-shadow: var(--shadow-card);
+        transition: color 0.2s ease, border-color 0.2s ease, background 0.2s ease, transform 0.15s ease;
+    }
+    .cv-theme-toggle:hover {
+        color: var(--accent-strong);
+        border-color: var(--border-strong);
+    }
+    .cv-theme-toggle:active {
+        transform: scale(0.96);
+    }
+    .theme-icon {
+        display: inline-flex;
+        line-height: 0;
+    }
+    /* Sun visible in light theme, moon visible in dark theme */
+    .theme-icon-moon {
+        display: none;
+    }
+    :global(html.dark) .theme-icon-sun {
+        display: none;
+    }
+    :global(html.dark) .theme-icon-moon {
+        display: inline-flex;
+    }
+    @media (max-width: 480px) {
+        .cv-theme-toggle {
+            width: 34px;
+            height: 34px;
+        }
+    }
+</style>
+
 <script is:inline>
     (function () {
         var THEME_KEY = 'theme';
