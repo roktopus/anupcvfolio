@@ -63,7 +63,8 @@
     }
 
     /* Matrix rain — fixed to viewport so it stays ambient while scrolling.
-       Sits above the gradient/mist but below main content (root is z-0). */
+       Sits above the gradient/mist but below main content (root is z-0).
+       Only on desktop/tablet (>=768px); mobile gets the static gradient. */
     .matrix-rain {
         position: fixed;
         inset: 0;
@@ -79,6 +80,12 @@
     @media (prefers-reduced-motion: reduce) {
         .matrix-rain {
             opacity: 0.35;
+        }
+    }
+    @media (max-width: 767px) {
+        .matrix-rain,
+        .mist {
+            display: none;
         }
     }
 
@@ -180,11 +187,16 @@
     });
 
     // --------------------------
-    // MATRIX CODE RAIN
+    // MATRIX CODE RAIN (desktop / tablet only)
     // --------------------------
+    const DESKTOP_QUERY = '(min-width: 768px)';
+
     function initMatrixRain() {
         const canvas = document.querySelector<HTMLCanvasElement>('.matrix-rain');
         if (!canvas) return;
+        if (!window.matchMedia(DESKTOP_QUERY).matches) return;
+        if (canvas.dataset.bound === 'true') return;
+        canvas.dataset.bound = 'true';
         const ctx = canvas.getContext('2d', { alpha: true });
         if (!ctx) return;
 
@@ -377,6 +389,17 @@
     } else {
         scheduleMatrixWhenIdle();
     }
+
+    // Lazily start the rain if the viewport grows to desktop/tablet after load.
+    let resizeToDesktopTimer: number | undefined;
+    window.addEventListener('resize', () => {
+        if (resizeToDesktopTimer) window.clearTimeout(resizeToDesktopTimer);
+        resizeToDesktopTimer = window.setTimeout(() => {
+            if (window.matchMedia(DESKTOP_QUERY).matches) {
+                initMatrixRain();
+            }
+        }, 250);
+    });
 
     // --------------------------
     // THEME CHANGE LISTENER

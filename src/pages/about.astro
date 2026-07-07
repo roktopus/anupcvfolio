@@ -1,5 +1,5 @@
 ---
-import { getEntry, getCollection, render } from 'astro:content';
+import { getEntry, getCollection } from 'astro:content';
 import { Image, getImage } from 'astro:assets';
 import type { ImageMetadata } from 'astro';
 import BaseLayout from '@/layouts/BaseLayout.astro';
@@ -79,6 +79,25 @@ function makeExcerpt(raw: string | undefined, max = 110): string {
     return text;
 }
 
+/** Cheap reading-time estimate from raw MDX (avoids a full render() per post). */
+function estimateReadingTime(mdx: string): string {
+    if (!mdx) return '1 min read';
+    const text = mdx
+        .replace(/```[\s\S]*?```/g, ' ')
+        .replace(/~~~[\s\S]*?~~~/g, ' ')
+        .replace(/`[^`]*`/g, ' ')
+        .replace(/!\[[^\]]*\]\([^)]*\)/g, ' ')
+        .replace(/\[([^\]]*)\]\([^)]*\)/g, '$1')
+        .replace(/<[^>]+>/g, ' ')
+        .replace(/https?:\/\/\S+/g, ' ')
+        .replace(/[#>*_~\-|`>]/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
+    const words = text ? text.split(' ').filter(Boolean).length : 0;
+    const mins = Math.max(1, Math.round(words / 200));
+    return `${mins} min read`;
+}
+
 const latestMeta: LatestPostMeta[] = await Promise.all(
     latestPosts.map(async (post) => {
         const mdx = mdxByPostId[post.id] ?? '';
@@ -86,7 +105,6 @@ const latestMeta: LatestPostMeta[] = await Promise.all(
         const ytId = ytUrl ? extractYouTubeId(ytUrl) : null;
         const type: 'article' | 'video' = ytId ? 'video' : 'article';
         const category = deriveCategory(post.id, post.data.title);
-        const { remarkPluginFrontmatter } = await render(post);
 
         let thumbSrc: string | null = null;
         let thumbSrcSet: string | null = null;
@@ -105,7 +123,7 @@ const latestMeta: LatestPostMeta[] = await Promise.all(
             id: post.id,
             title: post.data.title,
             dateText: formatDate(post.data.date),
-            minutesRead: remarkPluginFrontmatter.minutesRead as string,
+            minutesRead: estimateReadingTime(mdx),
             excerpt: makeExcerpt(post.data.seo?.description),
             category,
             type,
@@ -208,7 +226,7 @@ function resolveCompanyLogo(ref: string): CompanyLogoResolved {
                     <SocialLinks class="mt-1" />
 
                     <div class="cv-cta-row flex flex-wrap gap-3 mt-2">
-                        <a href="/writing" class="cv-btn cv-btn-primary" data-astro-prefetch="hover">
+                        <a href="/" class="cv-btn cv-btn-primary" data-astro-prefetch="hover">
                             <span>Read the Scrolls</span>
                             <PortfolioIcon name="arrow-right" size={16} />
                         </a>
@@ -280,7 +298,7 @@ function resolveCompanyLogo(ref: string): CompanyLogoResolved {
                 </span>
                 <h2 class="cv-h2">Fresh field notes and writing.</h2>
             </div>
-            <a href="/writing" class="cv-link-arrow" data-astro-prefetch="hover">
+            <a href="/" class="cv-link-arrow" data-astro-prefetch="hover">
                 View all scrolls
                 <PortfolioIcon name="arrow-right" size={15} />
             </a>

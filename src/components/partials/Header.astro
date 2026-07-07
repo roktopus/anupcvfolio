@@ -2,8 +2,8 @@
 const pathname = Astro.url.pathname;
 import SwitchTheme from '@/components/SwitchTheme.astro';
 
-const isAboutPage = pathname === '/' || pathname === '/about';
-const isWritingPage = pathname.startsWith('/writing');
+const isAboutPage = pathname === '/about';
+const isWritingPage = pathname === '/' || pathname.startsWith('/writing');
 
 const navItems = [
     {
@@ -14,7 +14,7 @@ const navItems = [
     },
     {
         label: 'Scrolls',
-        href: '/writing',
+        href: '/',
         active: isWritingPage,
         icon: 'scroll',
     },
