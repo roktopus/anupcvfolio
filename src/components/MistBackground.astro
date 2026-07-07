@@ -1,55 +1,15 @@
 ---
-// Mist Flow Background Component - Simplified for Performance
+// Background: soft mist + Matrix-style code rain (replaces blinking stars).
+// Rain is canvas-based, throttled, paused when the tab is hidden, and
+// respects prefers-reduced-motion. Themed with the orange accent.
 ---
 
 <!-- Scrolls with page: absolute fill of body (see global.css body position) -->
 <div class="mist-bg-root" aria-hidden="true">
     <div class="stage"></div>
-    <div class="sparkles">
-    <!-- Fallback static sparkles for immediate visibility -->
-    <div
-        class="star-sparkle"
-        data-sparkle="1"
-        style="left: 20%; top: 30%; --star-size: 12px; --duration: 2s;"
-    >
-    </div>
-    <div
-        class="star-sparkle"
-        data-sparkle="2"
-        style="left: 80%; top: 20%; --star-size: 10px; --duration: 2.5s; animation-delay: 0.5s;"
-    >
-    </div>
-    <div
-        class="star-sparkle"
-        data-sparkle="3"
-        style="left: 60%; top: 70%; --star-size: 14px; --duration: 1.8s; animation-delay: 1s;"
-    >
-    </div>
-    <div
-        class="star-sparkle"
-        data-sparkle="4"
-        style="left: 40%; top: 15%; --star-size: 11px; --duration: 2.2s; animation-delay: 1.5s;"
-    >
-    </div>
-    <div
-        class="star-sparkle"
-        data-sparkle="5"
-        style="left: 15%; top: 80%; --star-size: 13px; --duration: 2.8s; animation-delay: 2s;"
-    >
-    </div>
-    <div
-        class="star-sparkle"
-        data-sparkle="6"
-        style="left: 85%; top: 60%; --star-size: 9px; --duration: 1.6s; animation-delay: 2.5s;"
-    >
-    </div>
-    <div
-        class="star-sparkle"
-        data-sparkle="7"
-        style="left: 50%; top: 45%; --star-size: 10px; --duration: 2s; animation-delay: 0.35s;"
-    >
-    </div>
-    </div>
+
+    <!-- Matrix code rain (fixed to viewport for steady ambient effect) -->
+    <canvas class="matrix-rain"></canvas>
 
     <!-- Mist particles -->
     <div class="mist">
@@ -100,6 +60,26 @@
         inset: 0;
         background: linear-gradient(to bottom, var(--bg-2), var(--bg-1));
         z-index: 1;
+    }
+
+    /* Matrix rain — fixed to viewport so it stays ambient while scrolling.
+       Sits above the gradient/mist but below main content (root is z-0). */
+    .matrix-rain {
+        position: fixed;
+        inset: 0;
+        width: 100vw;
+        height: 100vh;
+        z-index: 3;
+        pointer-events: none;
+        opacity: 0.9;
+    }
+    :global(html:not(.dark)) .matrix-rain {
+        opacity: 0.55;
+    }
+    @media (prefers-reduced-motion: reduce) {
+        .matrix-rain {
+            opacity: 0.35;
+        }
     }
 
     /* Mist layer */
@@ -171,84 +151,6 @@
         .particle {
             animation: none;
         }
-        .star-sparkle {
-            animation: none;
-            opacity: 0.45;
-        }
-    }
-
-    /* Stars sit above mist within .mist-bg-root; whole root stays under main (z-10). */
-    .sparkles {
-        position: absolute;
-        inset: 0;
-        pointer-events: none;
-        z-index: 3;
-    }
-
-    /* Five-point star only (some old polygons were 8-point diamonds → looked square) */
-    .star-sparkle {
-        position: absolute;
-        width: var(--star-size, 12px);
-        height: var(--star-size, 12px);
-        background: var(--spark-a);
-        clip-path: polygon(
-            50% 0%,
-            61% 35%,
-            98% 35%,
-            68% 57%,
-            79% 91%,
-            50% 70%,
-            21% 91%,
-            32% 57%,
-            2% 35%,
-            39% 35%
-        );
-        -webkit-clip-path: polygon(
-            50% 0%,
-            61% 35%,
-            98% 35%,
-            68% 57%,
-            79% 91%,
-            50% 70%,
-            21% 91%,
-            32% 57%,
-            2% 35%,
-            39% 35%
-        );
-        opacity: 0;
-        transform: translate(-50%, -50%) scale(0.8);
-        animation: starFadeInOut var(--duration, 3s) ease-in-out infinite;
-        filter: drop-shadow(0 0 8px var(--spark-a));
-        pointer-events: none;
-    }
-
-    :global(html) .star-sparkle {
-        background: #ffd700;
-        filter: drop-shadow(0 0 6px #ffd700) drop-shadow(0 0 12px #ffb347);
-    }
-
-    :global(html.dark) .star-sparkle {
-        background: #00ffff;
-        filter: drop-shadow(0 0 6px #00ffff) drop-shadow(0 0 12px #00ff88);
-    }
-
-    @keyframes starFadeInOut {
-        0% {
-            opacity: 0;
-            transform: translate(-50%, -50%) scale(0.5);
-        }
-        20% {
-            opacity: 1;
-            transform: translate(-50%, -50%) scale(1);
-        }
-        80% {
-            opacity: 1;
-            transform: translate(-50%, -50%) scale(1);
-        }
-        100% {
-            opacity: 0;
-            transform: translate(-50%, -50%) scale(0.5);
-        }
     }
 </style>
 
@@ -276,64 +178,193 @@
         element.style.animationDuration = rand(28, 42) + 's';
         element.style.animationDelay = -rand(0, 22) + 's';
     });
-    // --------------------------
-    // Static sparkles (+1 vs original ≈ +17%, closest integer to +10%)
-    // --------------------------
-    function initializeSparkles() {
-        const sparkles = document.querySelectorAll(
-            '.star-sparkle[data-sparkle]'
-        ) as NodeListOf<HTMLElement>;
 
-        if (sparkles.length === 0) {
-            return;
+    // --------------------------
+    // MATRIX CODE RAIN
+    // --------------------------
+    function initMatrixRain() {
+        const canvas = document.querySelector<HTMLCanvasElement>('.matrix-rain');
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d', { alpha: true });
+        if (!ctx) return;
+
+        const reduceMotion = window.matchMedia(
+            '(prefers-reduced-motion: reduce)'
+        ).matches;
+
+        // Glyph set: half-width katakana + digits + a few symbols.
+        const GLYPHS: string[] = [];
+        for (let c = 0xff66; c <= 0xff9d; c++) GLYPHS.push(String.fromCharCode(c));
+        for (const c of '0123456789ABCDEF{}[]<>/*=+-$') GLYPHS.push(c);
+        const randGlyph = () => GLYPHS[(Math.random() * GLYPHS.length) | 0];
+
+        const FONT_SIZE = 16;
+        const TRAIL = 14; // glyphs per falling streak
+        const FRAME_MS = 55; // ~18fps, calm rain
+        const DPR = Math.min(window.devicePixelRatio || 1, 1.5);
+
+        let columns = 0;
+        let drops: { y: number; speed: number; skip: number; head: string }[] = [];
+        let viewW = 0;
+        let viewH = 0;
+        let accent = '#f97316';
+        let accentSoft = 'rgba(249,115,22,0.18)';
+        let baseAlpha = 0.55;
+        let headAlpha = 0.95;
+
+        function readTheme() {
+            const isDark = document.documentElement.classList.contains('dark');
+            const css = getComputedStyle(document.documentElement);
+            const a = css.getPropertyValue('--accent').trim() || (isDark ? '#ff8a3d' : '#f97316');
+            accent = a;
+            // Build a soft translucent variant for the tail.
+            const hex = a.replace('#', '');
+            if (hex.length === 6) {
+                const r = parseInt(hex.slice(0, 2), 16);
+                const g = parseInt(hex.slice(2, 4), 16);
+                const b = parseInt(hex.slice(4, 6), 16);
+                accentSoft = `rgba(${r},${g},${b},0.16)`;
+            } else {
+                accentSoft = isDark ? 'rgba(255,138,61,0.16)' : 'rgba(249,115,22,0.16)';
+            }
+            baseAlpha = isDark ? 0.55 : 0.5;
+            headAlpha = isDark ? 0.95 : 0.8;
         }
 
-        // Move sparkle to new position when it fades out
-        function moveSparkle(sparkle: HTMLElement, index: number) {
-            // Wait for the full animation cycle to complete
-            const duration =
-                parseFloat(sparkle.style.getPropertyValue('--duration')) * 1000;
-
-            setTimeout(() => {
-                // Stop the current animation
-                sparkle.style.animation = 'none';
-
-                // Change position while invisible
-                const x = rand(10, 90);
-                const y = rand(10, 90);
-                sparkle.style.left = x + '%';
-                sparkle.style.top = y + '%';
-
-                // Wait a moment then restart animation
-                setTimeout(() => {
-                    void sparkle.offsetWidth; // Trigger reflow
-                    sparkle.style.animation = `starFadeInOut ${duration / 1000}s ease-in-out infinite`;
-                }, 200); // Longer delay to ensure position change is visible
-            }, duration); // Wait for full animation cycle
+        function resize() {
+            viewW = window.innerWidth;
+            viewH = window.innerHeight;
+            canvas.width = Math.floor(viewW * DPR);
+            canvas.height = Math.floor(viewH * DPR);
+            canvas.style.width = viewW + 'px';
+            canvas.style.height = viewH + 'px';
+            ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+            columns = Math.ceil(viewW / FONT_SIZE);
+            drops = new Array(columns).fill(0).map(() => ({
+                y: -Math.floor(Math.random() * (viewH / FONT_SIZE)),
+                speed: 0.6 + Math.random() * 0.8,
+                skip: Math.floor(Math.random() * 6),
+                head: randGlyph(),
+            }));
         }
 
-        // Start the system
-        function startSparkleSystem() {
-            // Set up position changes for each sparkle
-            sparkles.forEach((sparkle, index) => {
-                // Move each sparkle at different intervals
-                function scheduleMove() {
-                    const delay = rand(3000, 8000); // 3-8 seconds between moves
-                    setTimeout(() => {
-                        moveSparkle(sparkle, index);
-                        scheduleMove();
-                    }, delay);
+        function draw() {
+            ctx.clearRect(0, 0, viewW, viewH);
+            ctx.font = `${FONT_SIZE}px ui-monospace, "SF Mono", Menlo, Consolas, monospace`;
+            ctx.textBaseline = 'top';
+
+            for (let i = 0; i < columns; i++) {
+                const drop = drops[i];
+                const x = i * FONT_SIZE;
+
+                // Occasionally flicker the head glyph.
+                if (Math.random() < 0.08) drop.head = randGlyph();
+
+                for (let k = 0; k < TRAIL; k++) {
+                    const gy = (drop.y - k) * FONT_SIZE;
+                    if (gy < -FONT_SIZE || gy > viewH) continue;
+                    const t = k / TRAIL;
+                    const alpha = (1 - t) * baseAlpha;
+                    if (k === 0) {
+                        ctx.fillStyle = accent;
+                        ctx.globalAlpha = headAlpha;
+                        ctx.fillText(drop.head, x, gy);
+                    } else {
+                        ctx.fillStyle = accent;
+                        ctx.globalAlpha = alpha;
+                        ctx.fillText(randGlyph(), x, gy);
+                    }
                 }
-                scheduleMove();
-            });
+                ctx.globalAlpha = 1;
+
+                // Advance this column.
+                drop.skip++;
+                if (drop.skip >= (1 / drop.speed) | 0) {
+                    drop.y += 1;
+                    drop.skip = 0;
+                }
+                if (drop.y - TRAIL > viewH / FONT_SIZE) {
+                    drop.y = -Math.floor(Math.random() * 20);
+                    drop.speed = 0.6 + Math.random() * 0.8;
+                }
+            }
         }
 
-        // Start the sparkle system
-        startSparkleSystem();
+        // Static single frame for reduced-motion users.
+        function drawStatic() {
+            ctx.clearRect(0, 0, viewW, viewH);
+            ctx.font = `${FONT_SIZE}px ui-monospace, "SF Mono", Menlo, Consolas, monospace`;
+            ctx.textBaseline = 'top';
+            for (let i = 0; i < columns; i++) {
+                const x = i * FONT_SIZE;
+                const rows = Math.floor(viewH / FONT_SIZE);
+                // Sparse, random scatter — no motion.
+                for (let r = 0; r < rows; r += 6) {
+                    ctx.fillStyle = accent;
+                    ctx.globalAlpha = 0.12 + Math.random() * 0.12;
+                    ctx.fillText(randGlyph(), x, r * FONT_SIZE);
+                }
+            }
+            ctx.globalAlpha = 1;
+        }
+
+        let rafId = 0;
+        let last = 0;
+        let running = false;
+
+        function loop(ts: number) {
+            if (!running) return;
+            if (document.hidden) {
+                rafId = requestAnimationFrame(loop);
+                return;
+            }
+            if (ts - last >= FRAME_MS) {
+                draw();
+                last = ts;
+            }
+            rafId = requestAnimationFrame(loop);
+        }
+
+        function start() {
+            if (running) return;
+            running = true;
+            last = performance.now();
+            rafId = requestAnimationFrame(loop);
+        }
+        function stop() {
+            running = false;
+            if (rafId) cancelAnimationFrame(rafId);
+            rafId = 0;
+        }
+
+        readTheme();
+        resize();
+        if (reduceMotion) {
+            drawStatic();
+        } else {
+            start();
+        }
+
+        // Pause animation when the tab is hidden; resume on visible.
+        document.addEventListener('visibilitychange', () => {
+            if (reduceMotion) return;
+            if (document.hidden) stop();
+            else start();
+        });
+
+        // Throttled resize.
+        let resizeTimer: number | undefined;
+        window.addEventListener('resize', () => {
+            if (resizeTimer) window.clearTimeout(resizeTimer);
+            resizeTimer = window.setTimeout(() => {
+                resize();
+                if (reduceMotion) drawStatic();
+            }, 200);
+        });
     }
 
-    function scheduleSparklesWhenIdle() {
-        const run = () => initializeSparkles();
+    function scheduleMatrixWhenIdle() {
+        const run = () => initMatrixRain();
         if ('requestIdleCallback' in window) {
             requestIdleCallback(run, { timeout: 2000 });
         } else {
@@ -342,9 +373,9 @@
     }
 
     if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', scheduleSparklesWhenIdle);
+        document.addEventListener('DOMContentLoaded', scheduleMatrixWhenIdle);
     } else {
-        scheduleSparklesWhenIdle();
+        scheduleMatrixWhenIdle();
     }
 
     // --------------------------
