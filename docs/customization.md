@@ -1,10 +1,10 @@
-# ✏️ Customizing CVfolio
+# ✏️ Customizing the site
 
-This guide walks you through how to customize the CVfolio template to reflect your personal profile, style, and content.
+This guide walks you through how to customize this site to reflect your personal profile, style, and content.
 
 ## 📁 Some important files
 
-Here’s an overview of folders relevant to customization:
+Here's an overview of folders relevant to customization:
 
 | Path                     | Purpose                                                   |
 |--------------------------|-----------------------------------------------------------|
@@ -15,5 +15,3 @@ Here’s an overview of folders relevant to customization:
 | `src/pages/`             | Page routing (`index.astro`, `writing/`)                  |
 | `src/styles/global.css`  | Global CSS and utility styles                             |
 | `src/lib/`               | Utility functions and constants                           |
-
-> You are free to preserve the labels of `Made by CVFolio` from the footer and the floating badge.
