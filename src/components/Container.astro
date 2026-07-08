@@ -10,12 +10,16 @@ type Props<Tag extends LayoutTag> = Polymorphic<{
     wide?: boolean;
 }>;
 
-const { as: Tag = 'div', class: className, wide = false } = Astro.props as Props<
-    LayoutTag
->;
+const {
+    as: Tag = 'div',
+    class: className,
+    wide = false,
+    ...rest
+} = Astro.props as Props<LayoutTag> & Record<string, unknown>;
 ---
 
 <Tag
+    {...rest}
     class:list={[
         wide ? 'max-w-[68rem] mx-auto px-4 sm:px-6' : 'max-w-[40rem] mx-auto px-4',
         className,

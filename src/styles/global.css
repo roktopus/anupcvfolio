@@ -8,6 +8,13 @@ html {
   overflow-y: scroll;
   overflow-x: hidden;
   max-width: 100%;
+  /* Offset anchor jumps for the fixed floating pill nav. */
+  scroll-padding-top: 6rem;
+}
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
 }
 
 @import 'tailwindcss';
