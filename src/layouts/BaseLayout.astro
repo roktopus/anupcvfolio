@@ -8,9 +8,11 @@ import MistBackground from '@/components/MistBackground.astro';
 
 interface Props {
     seo?: Seo;
+    /** Pause matrix rain / soften mist for long-form reading pages. */
+    quietBackground?: boolean;
 }
 
-const { seo } = Astro.props;
+const { seo, quietBackground = false } = Astro.props;
 ---
 
 <html lang="en">
@@ -18,7 +20,7 @@ const { seo } = Astro.props;
         <slot name="head" />
     </Head>
     <body class="text-foreground pb-12">
-        <MistBackground />
+        <MistBackground quiet={quietBackground} />
         <Header />
         <main class="pt-24 relative z-10">
             <slot />

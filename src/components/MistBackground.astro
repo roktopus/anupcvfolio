@@ -2,14 +2,24 @@
 // Background: soft mist + Matrix-style code rain (replaces blinking stars).
 // Rain is canvas-based, throttled, paused when the tab is hidden, and
 // respects prefers-reduced-motion. Themed with the orange accent.
+interface Props {
+    /** Hide matrix rain and soften mist (article reading mode). */
+    quiet?: boolean;
+}
+
+const { quiet = false } = Astro.props;
 ---
 
 <!-- Scrolls with page: absolute fill of body (see global.css body position) -->
-<div class="mist-bg-root" aria-hidden="true">
+<div
+    class:list={['mist-bg-root', quiet && 'mist-bg-root--quiet']}
+    data-quiet={quiet ? 'true' : undefined}
+    aria-hidden="true"
+>
     <div class="stage"></div>
 
     <!-- Matrix code rain (fixed to viewport for steady ambient effect) -->
-    <canvas class="matrix-rain"></canvas>
+    {!quiet && <canvas class="matrix-rain"></canvas>}
 
     <!-- Mist particles -->
     <div class="mist">
@@ -87,6 +97,18 @@
         .mist {
             display: none;
         }
+    }
+
+    /* Article reading mode: no rain, quieter mist over static gradient. */
+    .mist-bg-root--quiet .mist {
+        opacity: 0.35;
+    }
+    .mist-bg-root--quiet .particle {
+        animation: none;
+        opacity: 0.12;
+    }
+    .mist-bg-root--quiet .particle.layer2 {
+        opacity: 0.08;
     }
 
     /* Mist layer */
@@ -192,6 +214,7 @@
     const DESKTOP_QUERY = '(min-width: 768px)';
 
     function initMatrixRain() {
+        if (document.querySelector('.mist-bg-root--quiet')) return;
         const canvas = document.querySelector<HTMLCanvasElement>('.matrix-rain');
         if (!canvas) return;
         if (!window.matchMedia(DESKTOP_QUERY).matches) return;
